@@ -1,6 +1,7 @@
-package src
+package persistence
 
 import (
+	"awesomeProject/src/jwt/domain"
 	"errors"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -11,14 +12,6 @@ type DbConnection struct {
 	db *sqlx.DB
 }
 
-type User struct {
-	Id       int
-	Name     string
-	Email    string
-	Password string
-	Role     string
-}
-
 func (dbc *DbConnection) Connect() {
 	db, err := sqlx.Connect("postgres", "host=localhost port=5432 user=postgres dbname=postgres password=postgres sslmode=disable")
 	if err != nil {
@@ -27,7 +20,7 @@ func (dbc *DbConnection) Connect() {
 	dbc.db = db
 }
 
-func (dbc *DbConnection) CreateUser(user *User) {
+func (dbc *DbConnection) CreateUser(user *domain.User) {
 	var userId int
 	err := dbc.db.QueryRow(
 		"INSERT INTO users(name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id",
