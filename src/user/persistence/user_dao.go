@@ -1,7 +1,7 @@
 package persistence
 
 import (
-	"awesomeProject/src/jwt/domain"
+	"awesomeProject/src/user/domain"
 	"errors"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -28,4 +28,20 @@ func (dbc *DbConnection) CreateUser(user *domain.User) {
 	if err != nil {
 		log.Fatalln(errors.New("could not create user"))
 	}
+	user.Id = userId
 }
+
+func (dbc *DbConnection) GetUserById(userId int) *domain.User {
+	user := domain.User{}
+	err := dbc.db.Get(
+		&user,
+		"SELECT * from users WHERE id = $1", userId)
+	if err != nil {
+		return nil
+	}
+	return &user
+}
+
+//func (dbc *DbConnection) GetListOfUsers {
+//
+//}

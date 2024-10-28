@@ -1,14 +1,9 @@
 package domain
 
 import "github.com/golang-jwt/jwt/v5"
-
-type User struct {
-	Id       int
-	Name     string
-	Email    string
-	Password string
-	Role     string
-}
+import (
+	_ "awesomeProject/src/user/domain"
+)
 
 func GenerateToken(UserId int) (string, error) {
 
