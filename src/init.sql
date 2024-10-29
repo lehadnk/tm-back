@@ -5,3 +5,12 @@ CREATE TABLE users (
     password varchar(255),
     role varchar(255)
 );
+
+CREATE TABLE torrents (
+    id bigserial primary key,
+    name varchar(255),
+    status varchar(255),
+    filepath varchar(255),
+    created timestamp,
+    updated timestamp
+);

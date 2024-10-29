@@ -8,24 +8,20 @@ import (
 )
 
 func TestCreateUserInDb(t *testing.T) {
-	conn := persistence.DbConnection{}
-	conn.Connect()
-
+	userDao := persistence.NewUserDao()
 	fake := faker.New()
 
 	user := domain.NewUser("Pinky Pie 1", fake.Internet().Email(), "123456", "Pony")
-	conn.CreateUser(user)
+	userDao.CreateUser(user)
 }
 
 func TestSelectUserById(t *testing.T) {
-	conn := persistence.DbConnection{}
-	conn.Connect()
-
+	userDao := persistence.NewUserDao()
 	fake := faker.New()
 
 	user := domain.NewUser("Rainbow Dash", fake.Internet().Email(), "12334", "Pony")
-	conn.CreateUser(user)
-	readUser := conn.GetUserById(user.Id)
+	userDao.CreateUser(user)
+	readUser := userDao.GetUserById(user.Id)
 	if user.Id != readUser.Id {
 		t.Errorf("Ids are not matching")
 	}
@@ -44,10 +40,9 @@ func TestSelectUserById(t *testing.T) {
 }
 
 func TestSelectUserIsNotExist(t *testing.T) {
-	conn := persistence.DbConnection{}
-	conn.Connect()
+	userDao := persistence.NewUserDao()
 
-	readUser := conn.GetUserById(999999)
+	readUser := userDao.GetUserById(999999)
 	if readUser != nil {
 		t.Errorf("User should not be returned")
 	}
