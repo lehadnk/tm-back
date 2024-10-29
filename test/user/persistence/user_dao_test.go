@@ -4,6 +4,7 @@ import (
 	"awesomeProject/src/user/domain"
 	"awesomeProject/src/user/persistence"
 	"github.com/jaswdr/faker/v2"
+	"reflect"
 	"testing"
 )
 
@@ -22,20 +23,8 @@ func TestSelectUserById(t *testing.T) {
 	user := domain.NewUser("Rainbow Dash", fake.Internet().Email(), "12334", "Pony")
 	userDao.CreateUser(user)
 	readUser := userDao.GetUserById(user.Id)
-	if user.Id != readUser.Id {
-		t.Errorf("Ids are not matching")
-	}
-	if user.Name != readUser.Name {
-		t.Errorf("Names are not matching")
-	}
-	if user.Email != readUser.Email {
-		t.Errorf("Emails are not matching")
-	}
-	if user.Password != readUser.Password {
-		t.Errorf("Passwords are not matching")
-	}
-	if user.Role != readUser.Role {
-		t.Errorf("Roles are not matching")
+	if reflect.DeepEqual(user, readUser) {
+		t.Errorf("User isn't created")
 	}
 }
 
