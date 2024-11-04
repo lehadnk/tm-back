@@ -2,6 +2,7 @@ package transmission_client
 
 import (
 	"awesomeProject/src/transmission/cli_runner"
+	"strconv"
 )
 
 type TransmissionClient struct {
@@ -22,14 +23,32 @@ func (client *TransmissionClient) AddTorrentFile(torrentFilePath string, outputD
 	return true
 }
 
-func (client *TransmissionClient) GetTorrentList() {
+// array of tranmission torrents
+func (client *TransmissionClient) GetTorrentList() []string {
+	var args = []string{"-l"}
 
+	result, _ := client.cli.Run("transmission-remote", args)
+	stringResult := separateToLines(result)
+	separatedStringResult := parseLine(stringResult)
+	return separatedStringResult
 }
 
-func (client *TransmissionClient) DeleteTorrent(transmissionTorrentId int) {
+func (client *TransmissionClient) DeleteTorrent(transmissionTorrentId int) bool {
+	var args = []string{"-t", strconv.Itoa(transmissionTorrentId), "--remove-and-delete\n"}
 
+	_, stderr := client.cli.Run("transmission-remote", args)
+	if stderr != nil {
+		return false
+	}
+	return true
 }
 
-func (client *TransmissionClient) GetFileList(transmissionTorrentId int) {
+func (client *TransmissionClient) GetFileList(transmissionTorrentId int) bool {
+	var args = []string{"-t", strconv.Itoa(transmissionTorrentId), "-f"}
 
+	_, stderr := client.cli.Run("transmission-remote", args)
+	if stderr != nil {
+		return false
+	}
+	return true
 }
