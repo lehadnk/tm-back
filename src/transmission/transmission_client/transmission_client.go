@@ -24,13 +24,12 @@ func (client *TransmissionClient) AddTorrentFile(torrentFilePath string, outputD
 }
 
 // array of tranmission torrents
-func (client *TransmissionClient) GetTorrentList() []string {
+func (client *TransmissionClient) GetTorrentList() []*TransmissionTorrent {
 	var args = []string{"-l"}
+	parser := TransmissionParser{}
 
 	result, _ := client.cli.Run("transmission-remote", args)
-	stringResult := separateToLines(result)
-	separatedStringResult := parseLine(stringResult)
-	return separatedStringResult
+	return parser.SeparateToLines(result)
 }
 
 func (client *TransmissionClient) DeleteTorrent(transmissionTorrentId int) bool {

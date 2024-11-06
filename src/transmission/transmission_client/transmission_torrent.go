@@ -11,9 +11,3 @@ type TransmissionTorrent struct {
 	Status string
 	Name   string
 }
-
-func NewTransmissionTorrent(
-	id int, done string, have string, eta string, up string, down string, ratio string, status string, name string) *TransmissionTorrent {
-
-	return &TransmissionTorrent{}
-}
