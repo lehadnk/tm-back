@@ -39,3 +39,10 @@ func (dbc *UserDao) GetUserById(userId int) *domain.User {
 	}
 	return &user
 }
+
+func (dbc *UserDao) DeleteUser(userId int) {
+	_, err := dbc.Db.Exec("DELETE FROM users WHERE id = $1", userId)
+	if err != nil {
+		log.Fatalln(errors.New("could not delete user"))
+	}
+}

@@ -23,7 +23,6 @@ func (client *TransmissionClient) AddTorrentFile(torrentFilePath string, outputD
 	return true
 }
 
-// array of tranmission torrents
 func (client *TransmissionClient) GetTorrentList() []*TransmissionTorrent {
 	var args = []string{"-l"}
 	parser := TransmissionParser{}
