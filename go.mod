@@ -8,4 +8,7 @@ require (
 	github.com/lib/pq v1.10.9
 )
 
-require github.com/jaswdr/faker/v2 v2.3.2 // indirect
+require (
+	github.com/jaswdr/faker/v2 v2.3.2 // indirect
+	golang.org/x/crypto v0.28.0 // indirect
+)

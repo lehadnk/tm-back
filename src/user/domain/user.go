@@ -16,3 +16,15 @@ func NewUser(name string, email string, password string, role string) *User {
 		Role:     role,
 	}
 }
+
+type UsersList struct {
+	UsersArray []User
+	UsersCount int
+}
+
+func NewUsersList(usersArray []User, usersCount int) *UsersList {
+	return &UsersList{
+		UsersArray: usersArray,
+		UsersCount: usersCount,
+	}
+}
