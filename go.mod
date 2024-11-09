@@ -1,4 +1,4 @@
-module awesomeProject
+module tm
 
 go 1.23
 

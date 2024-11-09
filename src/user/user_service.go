@@ -1,9 +1,9 @@
 package user
 
 import (
-	"awesomeProject/src/user/dto"
-	"awesomeProject/src/user/persistence"
 	"golang.org/x/crypto/bcrypt"
+	"tm/src/user/dto"
+	"tm/src/user/persistence"
 )
 
 type UserService struct {

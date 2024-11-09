@@ -1,11 +1,11 @@
 package domain
 
 import (
-	"awesomeProject/src/user"
-	userdomain "awesomeProject/src/user/dto"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
+	"tm/src/user"
+	userdomain "tm/src/user/dto"
 )
 
 type JwtManager struct {

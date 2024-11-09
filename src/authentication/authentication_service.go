@@ -1,11 +1,11 @@
 package authentication
 
 import (
-	jwtdomain "awesomeProject/src/authentication/domain"
-	userdomain "awesomeProject/src/user/dto"
-	"awesomeProject/src/user/persistence"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
+	jwtdomain "tm/src/authentication/domain"
+	userdomain "tm/src/user/dto"
+	"tm/src/user/persistence"
 )
 
 type AuthService struct {

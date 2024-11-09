@@ -1,11 +1,10 @@
 package persistence
 
 import (
-	"awesomeProject/src/common"
-	"awesomeProject/src/user/dto"
-	"errors"
 	_ "github.com/lib/pq"
 	"log"
+	"tm/src/common"
+	"tm/src/user/dto"
 )
 
 type UserDao struct {
@@ -19,12 +18,13 @@ func NewUserDao() *UserDao {
 }
 
 func (dbc *UserDao) CreateUser(user *dto.User) {
+	log.Println("Creating user: " + user.Email)
 	var userId int
 	err := dbc.Db.QueryRow(
 		"INSERT INTO users(name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id",
 		user.Name, user.Email, user.Password, user.Role).Scan(&userId)
 	if err != nil {
-		log.Fatalln(errors.New("could not create user"))
+		log.Fatalln("Could not create user: " + err.Error())
 	}
 	user.Id = userId
 }
@@ -46,7 +46,7 @@ func (dbc *UserDao) GetUserByEmailAndPassword(email string, password string) *dt
 		&user,
 		"SELECT * from users WHERE email = $1 and password = $2", email, password)
 	if err != nil {
-		log.Fatalln(errors.New("could not get user"))
+		log.Fatalln("Could not select user: " + err.Error())
 	}
 	return &user
 }
@@ -58,7 +58,7 @@ func (dbc *UserDao) GetUsersList(sort string, page int, pageSize int) []dto.User
 	err := dbc.Db.Select(
 		&users, "SELECT * from users ORDER BY $1 LIMIT $2 OFFSET $3", sort, pageSize, offset)
 	if err != nil {
-		log.Fatalln(errors.New("could not get users"))
+		log.Fatalln("Could not select users: " + err.Error())
 	}
 	return users
 }
@@ -69,7 +69,7 @@ func (dbc *UserDao) GetUsersCount() int {
 		&usersCount,
 		"SELECT count from users")
 	if err != nil {
-		log.Fatalln(errors.New("could not get count"))
+		log.Fatalln("Could not obtain user count: " + err.Error())
 	}
 	return usersCount
 }
@@ -80,7 +80,7 @@ func (dbc *UserDao) EditUser(name string, email string, password string, role st
 			"UPDATE users SET name = $1, email = $2, password = $3, role = $4 WHERE id = $5",
 			name, email, password, role, userId)
 		if err != nil {
-			log.Fatalln(errors.New("could not update user"))
+			log.Fatalln("Could not update user: " + err.Error())
 		}
 	}
 
@@ -88,13 +88,13 @@ func (dbc *UserDao) EditUser(name string, email string, password string, role st
 		"UPDATE users SET name = $1, email = $2, role = $3 WHERE id = $4",
 		name, email, role, userId)
 	if err != nil {
-		log.Fatalln(errors.New("could not update user"))
+		log.Fatalln("Could not update user: " + err.Error())
 	}
 }
 
 func (dbc *UserDao) DeleteUser(userId int) {
 	_, err := dbc.Db.Exec("DELETE FROM users WHERE id = $1", userId)
 	if err != nil {
-		log.Fatalln(errors.New("could not delete user"))
+		log.Fatalln("Could not delete user: " + err.Error())
 	}
 }

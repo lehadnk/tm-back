@@ -1,15 +1,15 @@
 package transmission
 
 import (
-	"awesomeProject/src/transmission/domain"
-	"awesomeProject/src/transmission/dto"
+	"tm/src/transmission/domain"
+	"tm/src/transmission/dto"
 )
 
 type TransmissionService struct {
-	transmissionClient domain.TransmissionClient
+	transmissionClient *domain.TransmissionClient
 }
 
-func NewTransmissionService(transmissionClient domain.TransmissionClient) *TransmissionService {
+func NewTransmissionService(transmissionClient *domain.TransmissionClient) *TransmissionService {
 	var newTransmissionService = TransmissionService{
 		transmissionClient,
 	}

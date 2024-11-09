@@ -1,11 +1,11 @@
 package domain
 
 import (
-	"awesomeProject/src/transmission/dto"
 	"regexp"
 	_ "regexp"
 	"strconv"
 	"strings"
+	"tm/src/transmission/dto"
 )
 
 type TransmissionParser struct {

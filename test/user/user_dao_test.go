@@ -1,38 +1,40 @@
 package user
 
 import (
-	"awesomeProject/src/user/dto"
-	"awesomeProject/src/user/persistence"
 	"github.com/jaswdr/faker/v2"
 	"reflect"
 	"testing"
+	"tm/src/user/dto"
+	"tm/src/user/persistence"
 )
 
 func TestCreateUserInDb(t *testing.T) {
 	userDao := persistence.NewUserDao()
 	fake := faker.New()
 
-	user := dto.NewUser("Pinky Pie 1", fake.Internet().Email(), "123456", "Pony")
+	user := dto.NewUser(fake.Person().Name(), fake.Internet().Email(), fake.Internet().Password(), "Pony")
 	userDao.CreateUser(user)
 }
 
 func TestSelectUserById(t *testing.T) {
 	userDao := persistence.NewUserDao()
 	fake := faker.New()
+	// The test above runs at the same exact epoch, causing faker to initialize with the same seed, therefore the first email given is the same
+	fake.Internet().Email()
 
-	user := dto.NewUser("Rainbow Dash", fake.Internet().Email(), "12334", "Pony")
+	user := dto.NewUser(fake.Person().Name(), fake.Internet().Email(), fake.Internet().Password(), "Pony")
 	userDao.CreateUser(user)
 	readUser := userDao.GetUserById(user.Id)
 	if !reflect.DeepEqual(user, readUser) {
-		t.Errorf("User is not equal")
+		t.Errorf("User and readUser are not equal")
 	}
 }
 
-func TestSelectUserIsNotExist(t *testing.T) {
+func TestSelectUserDoesNotExist(t *testing.T) {
 	userDao := persistence.NewUserDao()
 
 	readUser := userDao.GetUserById(999999)
 	if readUser != nil {
-		t.Errorf("User should not be returned")
+		t.Errorf("User should be nil")
 	}
 }
