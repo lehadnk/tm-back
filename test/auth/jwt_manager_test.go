@@ -1,9 +1,9 @@
-package jwt
+package auth
 
 import (
-	jwtdomain "awesomeProject/src/jwt/domain"
+	jwtdomain "awesomeProject/src/authentication/domain"
 	"awesomeProject/src/user"
-	userdomain "awesomeProject/src/user/domain"
+	userdomain "awesomeProject/src/user/dto"
 	"awesomeProject/src/user/persistence"
 	"reflect"
 	"testing"
@@ -22,7 +22,7 @@ func TestGenerateToken(t *testing.T) {
 	}
 
 	var verifiedUser *userdomain.User
-	verifiedUser, err = jwtManager.VerifyTokenAndReturnUser(token)
+	verifiedUser, err = jwtManager.ExchangeToken(token)
 	if err != nil {
 		t.Fatal("Error while verifying token" + err.Error())
 	}

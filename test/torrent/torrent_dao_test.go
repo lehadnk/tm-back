@@ -1,7 +1,7 @@
-package persistence
+package torrent
 
 import (
-	"awesomeProject/src/torrent/domain"
+	"awesomeProject/src/torrent/dto"
 	"awesomeProject/src/torrent/persistence"
 	_ "github.com/lib/pq"
 	"reflect"
@@ -11,7 +11,7 @@ import (
 func TestCreateTorrentInDb(t *testing.T) {
 	torrentDao := persistence.NewTorrentDao()
 
-	torrent := domain.NewTorrent("Test torrent", "NEW", "http://test.com")
+	torrent := dto.NewTorrent("Test torrent", "NEW", "http://test.com")
 	torrentDao.CreateTorrent(torrent)
 
 	readTorrent := torrentDao.GetTorrentById(torrent.Id)
@@ -25,7 +25,7 @@ func TestGetListOfTorrents(t *testing.T) {
 	torrentDao.DeleteAllTorrents()
 
 	for i := 0; i < 3; i++ {
-		torrent := domain.NewTorrent("Test torrent", "NEW", "http://test.com")
+		torrent := dto.NewTorrent("Test torrent", "NEW", "http://test.com")
 		torrentDao.CreateTorrent(torrent)
 	}
 

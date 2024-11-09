@@ -1,4 +1,4 @@
-package domain
+package dto
 
 type User struct {
 	Id       int    `db:"id"`

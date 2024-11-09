@@ -1,4 +1,4 @@
-package cli_runner
+package domain
 
 import "os/exec"
 

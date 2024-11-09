@@ -1,6 +1,7 @@
-package transmission_client
+package domain
 
 import (
+	"awesomeProject/src/transmission/dto"
 	"regexp"
 	_ "regexp"
 	"strconv"
@@ -10,10 +11,10 @@ import (
 type TransmissionParser struct {
 }
 
-func (parser *TransmissionParser) SeparateToLines(stringToSplit string) []*TransmissionTorrent {
+func (parser *TransmissionParser) SeparateToLines(stringToSplit string) []*dto.TransmissionTorrent {
 	separatedResult := strings.SplitAfter(stringToSplit, "\n")
 
-	var lines []*TransmissionTorrent
+	var lines []*dto.TransmissionTorrent
 	for i := 1; i < len(separatedResult)-1; i++ {
 		line := parseLine(separatedResult[i])
 		lines = append(lines, line)
@@ -21,7 +22,7 @@ func (parser *TransmissionParser) SeparateToLines(stringToSplit string) []*Trans
 	return lines
 }
 
-func parseLine(line string) *TransmissionTorrent {
+func parseLine(line string) *dto.TransmissionTorrent {
 	re := regexp.MustCompile(`\s{2,}`)
 	parts := re.Split(strings.TrimSpace(line), -1)
 
@@ -34,7 +35,7 @@ func parseLine(line string) *TransmissionTorrent {
 	id, _ := strconv.Atoi(parts[0][:len(parts[0])-1])
 	ratio, _ := strconv.Atoi(parts[6])
 
-	return &TransmissionTorrent{
+	return &dto.TransmissionTorrent{
 		Id:     id,
 		Done:   parts[1],
 		Have:   parts[2],

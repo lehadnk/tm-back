@@ -2,7 +2,7 @@ package persistence
 
 import (
 	"awesomeProject/src/common"
-	"awesomeProject/src/user/domain"
+	"awesomeProject/src/user/dto"
 	"errors"
 	_ "github.com/lib/pq"
 	"log"
@@ -18,7 +18,7 @@ func NewUserDao() *UserDao {
 	return &newUserDao
 }
 
-func (dbc *UserDao) CreateUser(user *domain.User) {
+func (dbc *UserDao) CreateUser(user *dto.User) {
 	var userId int
 	err := dbc.Db.QueryRow(
 		"INSERT INTO users(name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id",
@@ -29,8 +29,8 @@ func (dbc *UserDao) CreateUser(user *domain.User) {
 	user.Id = userId
 }
 
-func (dbc *UserDao) GetUserById(userId int) *domain.User {
-	user := domain.User{}
+func (dbc *UserDao) GetUserById(userId int) *dto.User {
+	user := dto.User{}
 	err := dbc.Db.Get(
 		&user,
 		"SELECT * from users WHERE id = $1", userId)
@@ -40,8 +40,8 @@ func (dbc *UserDao) GetUserById(userId int) *domain.User {
 	return &user
 }
 
-func (dbc *UserDao) GetUserByEmailAndPassword(email string, password string) *domain.User {
-	user := domain.User{}
+func (dbc *UserDao) GetUserByEmailAndPassword(email string, password string) *dto.User {
+	user := dto.User{}
 	err := dbc.Db.Get(
 		&user,
 		"SELECT * from users WHERE email = $1 and password = $2", email, password)
@@ -51,8 +51,8 @@ func (dbc *UserDao) GetUserByEmailAndPassword(email string, password string) *do
 	return &user
 }
 
-func (dbc *UserDao) GetUsersList(sort string, page int, pageSize int) []domain.User {
-	var users []domain.User
+func (dbc *UserDao) GetUsersList(sort string, page int, pageSize int) []dto.User {
+	var users []dto.User
 	var offset = (page - 1) * pageSize
 
 	err := dbc.Db.Select(

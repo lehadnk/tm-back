@@ -1,10 +1,15 @@
-package transmission_client
+package transmission
+
+import (
+	"awesomeProject/src/transmission/domain"
+	"awesomeProject/src/transmission/dto"
+)
 
 type TransmissionService struct {
-	transmissionClient TransmissionClient
+	transmissionClient domain.TransmissionClient
 }
 
-func NewTransmissionService(transmissionClient TransmissionClient) *TransmissionService {
+func NewTransmissionService(transmissionClient domain.TransmissionClient) *TransmissionService {
 	var newTransmissionService = TransmissionService{
 		transmissionClient,
 	}
@@ -13,6 +18,11 @@ func NewTransmissionService(transmissionClient TransmissionClient) *Transmission
 
 func (transmissionService *TransmissionService) AddNewTransmissionTorrent(torrentFilePath string, outputDirectory string) {
 	transmissionService.transmissionClient.AddTorrentFile(torrentFilePath, outputDirectory)
+}
+
+func (transmissionService *TransmissionService) GetTransmissionTorrentList() []*dto.TransmissionTorrent {
+	transmissionTorrentList := transmissionService.transmissionClient.GetTorrentsList()
+	return transmissionTorrentList
 }
 
 func (transmissionService *TransmissionService) GetTransmissionTorrentInfo() {

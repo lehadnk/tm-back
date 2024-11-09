@@ -1,7 +1,7 @@
-package persistence
+package user
 
 import (
-	"awesomeProject/src/user/domain"
+	"awesomeProject/src/user/dto"
 	"awesomeProject/src/user/persistence"
 	"github.com/jaswdr/faker/v2"
 	"reflect"
@@ -12,7 +12,7 @@ func TestCreateUserInDb(t *testing.T) {
 	userDao := persistence.NewUserDao()
 	fake := faker.New()
 
-	user := domain.NewUser("Pinky Pie 1", fake.Internet().Email(), "123456", "Pony")
+	user := dto.NewUser("Pinky Pie 1", fake.Internet().Email(), "123456", "Pony")
 	userDao.CreateUser(user)
 }
 
@@ -20,11 +20,11 @@ func TestSelectUserById(t *testing.T) {
 	userDao := persistence.NewUserDao()
 	fake := faker.New()
 
-	user := domain.NewUser("Rainbow Dash", fake.Internet().Email(), "12334", "Pony")
+	user := dto.NewUser("Rainbow Dash", fake.Internet().Email(), "12334", "Pony")
 	userDao.CreateUser(user)
 	readUser := userDao.GetUserById(user.Id)
-	if reflect.DeepEqual(user, readUser) {
-		t.Errorf("User isn't created")
+	if !reflect.DeepEqual(user, readUser) {
+		t.Errorf("User is not equal")
 	}
 }
 

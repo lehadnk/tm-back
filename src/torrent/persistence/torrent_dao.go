@@ -2,7 +2,7 @@ package persistence
 
 import (
 	"awesomeProject/src/common"
-	"awesomeProject/src/torrent/domain"
+	"awesomeProject/src/torrent/dto"
 	"errors"
 	_ "github.com/lib/pq"
 	"log"
@@ -18,7 +18,7 @@ func NewTorrentDao() *TorrentDao {
 	return &newTorrentDao
 }
 
-func (dbc *TorrentDao) CreateTorrent(torrent *domain.Torrent) {
+func (dbc *TorrentDao) CreateTorrent(torrent *dto.Torrent) {
 	var torrentId int
 	err := dbc.Db.QueryRow(
 		"INSERT INTO torrents(name, status, filepath, created, updated) VALUES ($1, $2, $3, $4, $5) RETURNING id",
@@ -29,8 +29,8 @@ func (dbc *TorrentDao) CreateTorrent(torrent *domain.Torrent) {
 	torrent.Id = torrentId
 }
 
-func (dbc *TorrentDao) GetTorrentById(torrentId int) *domain.Torrent {
-	torrent := domain.Torrent{}
+func (dbc *TorrentDao) GetTorrentById(torrentId int) *dto.Torrent {
+	torrent := dto.Torrent{}
 	err := dbc.Db.Get(
 		&torrent,
 		"SELECT * from torrents WHERE id = $1",
@@ -41,8 +41,8 @@ func (dbc *TorrentDao) GetTorrentById(torrentId int) *domain.Torrent {
 	return &torrent
 }
 
-func (dbc *TorrentDao) GetTorrentByStatus(torrentStatus string) *domain.Torrent {
-	torrent := domain.Torrent{}
+func (dbc *TorrentDao) GetTorrentByStatus(torrentStatus string) *dto.Torrent {
+	torrent := dto.Torrent{}
 	err := dbc.Db.Get(
 		&torrent, "SELECT * from torrents WHERE status = $1", torrentStatus)
 	if err != nil {
@@ -51,8 +51,8 @@ func (dbc *TorrentDao) GetTorrentByStatus(torrentStatus string) *domain.Torrent 
 	return &torrent
 }
 
-func (dbc *TorrentDao) GetListOfTorrents(sort string, page int, pageSize int) []domain.Torrent {
-	var torrents []domain.Torrent
+func (dbc *TorrentDao) GetListOfTorrents(sort string, page int, pageSize int) []*dto.Torrent {
+	var torrents []*dto.Torrent
 	var offset = (page - 1) * pageSize
 
 	err := dbc.Db.Select(
@@ -65,8 +65,8 @@ func (dbc *TorrentDao) GetListOfTorrents(sort string, page int, pageSize int) []
 
 func (dbc *TorrentDao) GetCountOfTorrents() int {
 	var torrentsCount int
-	err := dbc.Db.Select(
-		&torrentsCount, "SELECT COUNT * from torrents")
+	err := dbc.Db.Get(
+		&torrentsCount, "SELECT COUNT(*) from torrents")
 	if err != nil {
 		log.Fatalln(errors.New("could not get count"))
 	}

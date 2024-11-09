@@ -1,8 +1,8 @@
-package auth
+package authentication
 
 import (
-	jwtdomain "awesomeProject/src/jwt/domain"
-	userdomain "awesomeProject/src/user/domain"
+	jwtdomain "awesomeProject/src/authentication/domain"
+	userdomain "awesomeProject/src/user/dto"
 	"awesomeProject/src/user/persistence"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
@@ -40,7 +40,7 @@ func (authService *AuthService) Login(email string, password string) (*userdomai
 }
 
 func (authService *AuthService) GetCurrentUser(token string) (*userdomain.User, error) {
-	currentUser, err := authService.jwtManager.VerifyTokenAndReturnUser(token)
+	currentUser, err := authService.jwtManager.ExchangeToken(token)
 	if err != nil {
 		return nil, fmt.Errorf("could not verify token")
 	}

@@ -1,15 +1,16 @@
-package transmission_client
+package domain
 
 import (
-	"awesomeProject/src/transmission/cli_runner"
+	"awesomeProject/src/cli/domain"
+	"awesomeProject/src/transmission/dto"
 	"strconv"
 )
 
 type TransmissionClient struct {
-	cli cli_runner.CliRunnerInterface
+	cli domain.CliRunnerInterface
 }
 
-func NewTransmissionClient(runner cli_runner.CliRunnerInterface) *TransmissionClient {
+func NewTransmissionClient(runner domain.CliRunnerInterface) *TransmissionClient {
 	return &TransmissionClient{cli: runner}
 }
 
@@ -23,7 +24,7 @@ func (client *TransmissionClient) AddTorrentFile(torrentFilePath string, outputD
 	return true
 }
 
-func (client *TransmissionClient) GetTorrentList() []*TransmissionTorrent {
+func (client *TransmissionClient) GetTorrentsList() []*dto.TransmissionTorrent {
 	var args = []string{"-l"}
 	parser := TransmissionParser{}
 

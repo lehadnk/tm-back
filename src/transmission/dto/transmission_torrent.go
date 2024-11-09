@@ -1,4 +1,4 @@
-package transmission_client
+package dto
 
 type TransmissionTorrent struct {
 	Id     int

@@ -1,4 +1,4 @@
-package domain
+package dto
 
 import "time"
 
@@ -21,7 +21,7 @@ func NewTorrent(name string, status string, filepath string) *Torrent {
 	}
 }
 
-type TorrentsList struct {
-	TorrentsArray []Torrent
+type TorrentsListFromDB struct {
+	TorrentsArray []*Torrent
 	TorrentsCount int
 }

@@ -2,7 +2,7 @@ package domain
 
 import (
 	"awesomeProject/src/user"
-	userdomain "awesomeProject/src/user/domain"
+	userdomain "awesomeProject/src/user/dto"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
@@ -36,7 +36,7 @@ func (jwtManager *JwtManager) GenerateToken(user *userdomain.User) (string, erro
 	return tokenString, nil
 }
 
-func (jwtManager *JwtManager) VerifyTokenAndReturnUser(tokenString string) (*userdomain.User, error) {
+func (jwtManager *JwtManager) ExchangeToken(tokenString string) (*userdomain.User, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
