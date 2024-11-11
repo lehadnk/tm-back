@@ -23,7 +23,7 @@ func NewTorrentManager(
 }
 
 func (torrentManager *TorrentManager) GetTorrentList(sort string, page int, pageSize int) dto.FinalTorrentsList {
-	torrentsListFromDB := torrentManager.TorrentDao.GetListOfTorrents(sort, page, pageSize)
+	torrentsListFromDB := torrentManager.TorrentDao.GetTorrentsList(sort, page, pageSize)
 	torrentsCount := torrentManager.TorrentDao.GetCountOfTorrents()
 	torrentsListFromTransmission := torrentManager.TransmissionService.GetTransmissionTorrentList()
 
@@ -48,8 +48,8 @@ func (torrentManager *TorrentManager) GetTorrentList(sort string, page int, page
 	return finalTorrentsList
 }
 
-func (torrentManager *TorrentManager) AddNewTorrent(torrentFilePath string, outputDirectory string) {
-
+func (torrentManager *TorrentManager) AddTorrent(torrentFilePath string, outputDirectory string) {
+	
 	// запись файла на диск
 	//вызов трансмишн сервиса для добавления загрузки в клиент
 	//сохранение информации о загрузке в базу

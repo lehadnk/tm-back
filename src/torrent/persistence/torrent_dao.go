@@ -18,7 +18,7 @@ func NewTorrentDao() *TorrentDao {
 	return &newTorrentDao
 }
 
-func (dbc *TorrentDao) CreateTorrent(torrent *dto.Torrent) {
+func (dbc *TorrentDao) SaveTorrent(torrent *dto.Torrent) {
 	var torrentId int
 	err := dbc.Db.QueryRow(
 		"INSERT INTO torrents(name, status, filepath, created, updated) VALUES ($1, $2, $3, $4, $5) RETURNING id",
@@ -51,7 +51,7 @@ func (dbc *TorrentDao) GetTorrentByStatus(torrentStatus string) *dto.Torrent {
 	return &torrent
 }
 
-func (dbc *TorrentDao) GetListOfTorrents(sort string, page int, pageSize int) []*dto.Torrent {
+func (dbc *TorrentDao) GetTorrentsList(sort string, page int, pageSize int) []*dto.Torrent {
 	var torrents []*dto.Torrent
 	var offset = (page - 1) * pageSize
 

@@ -14,7 +14,7 @@ func TestGetTorrentList(t *testing.T) {
 
 	for i := 0; i < 2; i++ {
 		torrent := dto.NewTorrent("Test torrent", "NEW", "http://test.com")
-		torrentDao.CreateTorrent(torrent)
+		torrentDao.SaveTorrent(torrent)
 	}
 	torrentManager.GetTorrentList("id", 1, 2)
 
