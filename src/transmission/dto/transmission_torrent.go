@@ -11,3 +11,12 @@ type TransmissionTorrent struct {
 	Status string
 	Name   string
 }
+
+type TransmissionTorrentFile struct {
+	Id       int
+	Done     string
+	Priority string
+	Get      string
+	Size     string
+	Name     string
+}

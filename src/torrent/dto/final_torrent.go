@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"awesomeProject/src/transmission/dto"
+	"tm/src/transmission/dto"
 )
 
 type FinalTorrent struct {

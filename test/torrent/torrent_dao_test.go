@@ -1,11 +1,11 @@
 package torrent
 
 import (
-	"awesomeProject/src/torrent/dto"
-	"awesomeProject/src/torrent/persistence"
 	_ "github.com/lib/pq"
 	"reflect"
 	"testing"
+	"tm/src/torrent/dto"
+	"tm/src/torrent/persistence"
 )
 
 func TestCreateTorrentInDb(t *testing.T) {

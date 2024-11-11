@@ -1,11 +1,11 @@
 package filesystem
 
 import (
-	"awesomeProject/src/filesystem"
-	"awesomeProject/src/filesystem/domain"
-	"awesomeProject/test"
 	"reflect"
 	"testing"
+	"tm/src/filesystem"
+	"tm/src/filesystem/domain"
+	"tm/test"
 )
 
 func TestSaveTorrentFile(t *testing.T) {

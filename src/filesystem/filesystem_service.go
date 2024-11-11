@@ -1,6 +1,6 @@
 package filesystem
 
-import "awesomeProject/src/filesystem/domain"
+import "tm/src/filesystem/domain"
 
 type FilesystemService struct {
 }

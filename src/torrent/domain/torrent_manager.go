@@ -1,9 +1,9 @@
 package domain
 
 import (
-	"awesomeProject/src/torrent/dto"
-	"awesomeProject/src/torrent/persistence"
-	"awesomeProject/src/transmission"
+	"tm/src/torrent/dto"
+	"tm/src/torrent/persistence"
+	"tm/src/transmission"
 )
 
 type TorrentManager struct {
@@ -29,8 +29,8 @@ func (torrentManager *TorrentManager) GetTorrentList(sort string, page int, page
 
 	var finalTorrents []*dto.FinalTorrent
 	for i := 0; i < len(torrentsListFromDB); i++ {
-		for j := 0; j < len(torrentsListFromTransmission); i++ {
-			if torrentsListFromDB[i].Name != torrentsListFromTransmission[i].Name {
+		for j := 0; j < len(torrentsListFromTransmission); j++ {
+			if torrentsListFromDB[i].Name != torrentsListFromTransmission[j].Name {
 				continue
 			}
 

@@ -1,32 +1,37 @@
 package auth
 
 import (
-	jwtdomain "awesomeProject/src/authentication/domain"
-	"awesomeProject/src/user"
-	userdomain "awesomeProject/src/user/dto"
-	"awesomeProject/src/user/persistence"
+	"github.com/jaswdr/faker/v2"
 	"reflect"
 	"testing"
+	jwtdomain "tm/src/authentication/domain"
+	"tm/src/user"
+	userdomain "tm/src/user/dto"
+	"tm/src/user/persistence"
 )
 
 func TestGenerateToken(t *testing.T) {
-	testUser := userdomain.NewUser("Test username", "test@test.com", "qwe123", "Admin")
 	userDao := persistence.NewUserDao()
-	userDao.CreateUser(testUser)
 	userService := user.NewUserService(userDao)
 	jwtManager := jwtdomain.NewJwtManager(userService)
 
+	fake := faker.New()
+
+	testUser := userdomain.NewUser(fake.Person().Name(), fake.Internet().Email(), fake.Internet().Password(), "Admin")
+	userDao.CreateUser(testUser)
+
 	token, err := jwtManager.GenerateToken(testUser)
 	if err != nil {
-		t.Fatal("Error while generating token" + err.Error())
+		t.Fatal("Error while generating token: " + err.Error())
 	}
 
 	var verifiedUser *userdomain.User
 	verifiedUser, err = jwtManager.ExchangeToken(token)
 	if err != nil {
-		t.Fatal("Error while verifying token" + err.Error())
+		t.Fatal("Error while verifying token: " + err.Error())
 	}
+
 	if !reflect.DeepEqual(testUser, verifiedUser) {
-		t.Fatal("User is not the same")
+		t.Fatal("testUser and verifiedUser are not the same")
 	}
 }

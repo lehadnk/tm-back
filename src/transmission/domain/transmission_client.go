@@ -1,26 +1,32 @@
 package domain
 
 import (
-	"awesomeProject/src/cli/domain"
-	"awesomeProject/src/transmission/dto"
 	"strconv"
+	"strings"
+	"tm/src/cli/domain"
+	"tm/src/transmission/dto"
 )
 
 type TransmissionClient struct {
 	cli domain.CliRunnerInterface
 }
 
-func NewTransmissionClient(runner domain.CliRunnerInterface) *TransmissionClient {
-	return &TransmissionClient{cli: runner}
+func NewTransmissionClient(cli domain.CliRunnerInterface) *TransmissionClient {
+	return &TransmissionClient{cli: cli}
 }
 
 func (client *TransmissionClient) AddTorrentFile(torrentFilePath string, outputDirectory string) bool {
 	var args = []string{"-a", torrentFilePath, "-w", outputDirectory}
 
-	_, stderr := client.cli.Run("transmission-remote", args)
+	stdout, stderr := client.cli.Run("transmission-remote", args)
 	if stderr != nil {
 		return false
 	}
+
+	if !strings.Contains(stdout, "success") {
+		return false
+	}
+
 	return true
 }
 
@@ -42,12 +48,12 @@ func (client *TransmissionClient) DeleteTorrent(transmissionTorrentId int) bool 
 	return true
 }
 
-func (client *TransmissionClient) GetFileList(transmissionTorrentId int) bool {
+func (client *TransmissionClient) GetFileList(transmissionTorrentId int) []*dto.TransmissionTorrentFile {
 	var args = []string{"-t", strconv.Itoa(transmissionTorrentId), "-f"}
 
 	_, stderr := client.cli.Run("transmission-remote", args)
 	if stderr != nil {
-		return false
+		return []*dto.TransmissionTorrentFile{}
 	}
-	return true
+	return []*dto.TransmissionTorrentFile{}
 }
