@@ -4,25 +4,25 @@ import (
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	jwtdomain "tm/src/authentication/domain"
+	"tm/src/user"
 	userdomain "tm/src/user/dto"
-	"tm/src/user/persistence"
 )
 
 type AuthService struct {
-	userDao    *persistence.UserDao
-	jwtManager *jwtdomain.JwtManager
+	userService *user.UserService
+	jwtManager  *jwtdomain.JwtManager
 }
 
-func NewAuthService(userDao *persistence.UserDao, jwtManager *jwtdomain.JwtManager) *AuthService {
+func NewAuthService(userService *user.UserService, jwtManager *jwtdomain.JwtManager) *AuthService {
 	var newAuthService = AuthService{
-		userDao,
+		userService,
 		jwtManager,
 	}
 	return &newAuthService
 }
 
 func (authService *AuthService) Login(email string, password string) (*userdomain.User, string, error) {
-	userFromDB := authService.userDao.GetUserByEmailAndPassword(email, password)
+	userFromDB := authService.userService.GetUserByEmailAndPassword(email, password)
 	if userFromDB == nil {
 		return nil, "", fmt.Errorf("user not found")
 	}

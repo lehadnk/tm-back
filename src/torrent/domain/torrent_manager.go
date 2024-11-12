@@ -49,8 +49,11 @@ func (torrentManager *TorrentManager) GetTorrentList(sort string, page int, page
 }
 
 func (torrentManager *TorrentManager) AddTorrent(torrentFilePath string, outputDirectory string) {
-	
+
 	// запись файла на диск
 	//вызов трансмишн сервиса для добавления загрузки в клиент
 	//сохранение информации о загрузке в базу
+}
+
+func (torrentManager *TorrentManager) DeleteTorrent(torrentId int) {
 }

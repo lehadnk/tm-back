@@ -16,19 +16,14 @@ func NewTransmissionService(transmissionClient *domain.TransmissionClient) *Tran
 	return &newTransmissionService
 }
 
-func (transmissionService *TransmissionService) AddNewTransmissionTorrent(torrentFilePath string, outputDirectory string) {
-	transmissionService.transmissionClient.AddTorrentFile(torrentFilePath, outputDirectory)
+func (transmissionService *TransmissionService) AddTransmissionTorrentFile(torrentFilePath string, outputDirectory string) {
+	transmissionService.transmissionClient.AddTransmissionTorrentFile(torrentFilePath, outputDirectory)
 }
 
 func (transmissionService *TransmissionService) GetTransmissionTorrentList() []*dto.TransmissionTorrent {
-	transmissionTorrentList := transmissionService.transmissionClient.GetTorrentsList()
-	return transmissionTorrentList
+	return transmissionService.transmissionClient.GetTransmissionTorrentList()
 }
 
-func (transmissionService *TransmissionService) GetTransmissionTorrentInfo() {
-
-}
-
-func (transmissionService *TransmissionService) DeleteTransmissionTorrent() {
-
+func (transmissionService *TransmissionService) DeleteTransmissionTorrent(transmissionTorrentId int) bool {
+	return transmissionService.transmissionClient.DeleteTransmissionTorrent(transmissionTorrentId)
 }
