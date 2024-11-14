@@ -5,6 +5,9 @@
       <functions>
         <function importPath="os" name="Open" />
       </functions>
+      <methods>
+        <method importPath="tm/src/torrent/domain" receiver="*TorrentManager" name="AddTorrent" />
+      </methods>
     </inspection_tool>
     <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredIdentifiers">

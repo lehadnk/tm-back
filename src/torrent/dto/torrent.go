@@ -3,21 +3,23 @@ package dto
 import "time"
 
 type Torrent struct {
-	Id       int       `db:"id"`
-	Name     string    `db:"name"`
-	Status   string    `db:"status"`
-	Filepath string    `db:"filepath"`
-	Created  time.Time `db:"created"`
-	Updated  time.Time `db:"updated"`
+	Id              int       `db:"id"`
+	Name            string    `db:"name"`
+	Status          string    `db:"status"`
+	Filepath        string    `db:"filepath"`
+	OutputDirectory string    `db:"output_directory"`
+	Created         time.Time `db:"created"`
+	Updated         time.Time `db:"updated"`
 }
 
-func NewTorrent(name string, status string, filepath string) *Torrent {
+func NewTorrent(name string, status string, filepath string, outputdirectory string) *Torrent {
 	return &Torrent{
-		Name:     name,
-		Status:   status,
-		Filepath: filepath,
-		Created:  time.Now(),
-		Updated:  time.Now(),
+		Name:            name,
+		Status:          status,
+		Filepath:        filepath,
+		OutputDirectory: outputdirectory,
+		Created:         time.Now(),
+		Updated:         time.Now(),
 	}
 }
 

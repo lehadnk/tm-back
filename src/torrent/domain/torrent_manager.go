@@ -1,6 +1,9 @@
 package domain
 
 import (
+	"log"
+	"tm/src/common"
+	"tm/src/filesystem"
 	"tm/src/torrent/dto"
 	"tm/src/torrent/persistence"
 	"tm/src/transmission"
@@ -9,15 +12,18 @@ import (
 type TorrentManager struct {
 	TorrentDao          *persistence.TorrentDao
 	TransmissionService *transmission.TransmissionService
+	Filesystemservice   *filesystem.FilesystemService
 }
 
 func NewTorrentManager(
 	torrentDao *persistence.TorrentDao,
 	transmissionService *transmission.TransmissionService,
+	filesystemservice *filesystem.FilesystemService,
 ) *TorrentManager {
 	var newTorrentManager = TorrentManager{
 		torrentDao,
 		transmissionService,
+		filesystemservice,
 	}
 	return &newTorrentManager
 }
@@ -48,12 +54,28 @@ func (torrentManager *TorrentManager) GetTorrentList(sort string, page int, page
 	return finalTorrentsList
 }
 
-func (torrentManager *TorrentManager) AddTorrent(torrentFilePath string, outputDirectory string) {
+func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, error) {
+	filename := common.StringWithCharset(24, "abcdefghijklmnopqrstuvwxyz")
+	torrentFilePath, err := torrentManager.Filesystemservice.SaveTorrentFile(file, filename+".torrent")
+	if err != nil {
+		log.Fatalln("Error while saving file:" + err.Error())
+		return nil, err
+	}
 
-	// запись файла на диск
-	//вызов трансмишн сервиса для добавления загрузки в клиент
-	//сохранение информации о загрузке в базу
+	outputDirectory, err := torrentManager.Filesystemservice.CreateTorrentOutputDirectory(filename)
+	if err != nil {
+		log.Fatalln("Error while creating output directory:" + err.Error())
+		return nil, err
+	}
+
+	torrentManager.TransmissionService.AddTransmissionTorrentFile(torrentFilePath, outputDirectory)
+	torrentDto := dto.NewTorrent("123", "NEW", torrentFilePath, outputDirectory)
+	torrentManager.TorrentDao.SaveTorrent(torrentDto)
+
+	return torrentDto, err
 }
 
 func (torrentManager *TorrentManager) DeleteTorrent(torrentId int) {
+	torrentManager.TransmissionService.DeleteTransmissionTorrent(torrentId)
+	torrentManager.TorrentDao.DeleteTorrentById([]int{torrentId})
 }

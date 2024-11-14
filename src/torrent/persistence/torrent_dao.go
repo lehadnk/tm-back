@@ -20,8 +20,8 @@ func NewTorrentDao() *TorrentDao {
 func (dbc *TorrentDao) SaveTorrent(torrent *dto.Torrent) {
 	var torrentId int
 	err := dbc.Db.QueryRow(
-		"INSERT INTO torrents(name, status, filepath, created, updated) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-		torrent.Name, torrent.Status, torrent.Filepath, torrent.Created, torrent.Updated,
+		"INSERT INTO torrents(name, status, filepath, output_directory, created, updated) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+		torrent.Name, torrent.Status, torrent.Filepath, torrent.OutputDirectory, torrent.Created, torrent.Updated,
 	).Scan(&torrentId)
 	if err != nil {
 		log.Fatalln("Could not create torrent: " + err.Error())

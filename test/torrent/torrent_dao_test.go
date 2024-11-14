@@ -11,7 +11,7 @@ import (
 func TestCreateTorrentInDb(t *testing.T) {
 	torrentDao := persistence.NewTorrentDao()
 
-	torrent := dto.NewTorrent("Test torrent", "NEW", "http://test.com")
+	torrent := dto.NewTorrent("Test torrent", "NEW", "http://test.com", "/tmp")
 	torrentDao.SaveTorrent(torrent)
 
 	readTorrent := torrentDao.GetTorrentById(torrent.Id)
@@ -25,7 +25,7 @@ func TestGetListOfTorrents(t *testing.T) {
 	torrentDao.DeleteAllTorrents()
 
 	for i := 0; i < 3; i++ {
-		torrent := dto.NewTorrent("Test torrent", "NEW", "http://test.com")
+		torrent := dto.NewTorrent("Test torrent", "NEW", "http://test.com", "/tmp")
 		torrentDao.SaveTorrent(torrent)
 	}
 

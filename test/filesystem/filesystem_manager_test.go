@@ -4,9 +4,9 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"tm/src/common"
 	"tm/src/filesystem"
 	"tm/src/filesystem/domain"
-	"tm/test"
 )
 
 func TestSaveTorrentFile(t *testing.T) {
@@ -18,8 +18,8 @@ func TestSaveTorrentFile(t *testing.T) {
 		t.Errorf("Error reading file")
 	}
 
-	testFilePath := "/tmp/" + test.StringWithCharset(10, "abcdefghijklmnopqrstuvwxyz") + ".torrent"
-	err := filesystemService.SaveTorrentFile(file, testFilePath)
+	testFileName := common.StringWithCharset(10, "abcdefghijklmnopqrstuvwxyz") + ".torrent"
+	testFilePath, err := filesystemService.SaveTorrentFile(file, testFileName)
 	if err != nil {
 		t.Errorf("Error while saving file")
 	}
@@ -35,10 +35,10 @@ func TestSaveTorrentFile(t *testing.T) {
 }
 
 func TestCreateOutputDirectory(t *testing.T) {
-	var directoryPath = "/tmp/" + test.StringWithCharset(10, "abcdefghijklmnopqrstuvwxyz")
+	var directoryPath = "/tmp/" + common.StringWithCharset(10, "abcdefghijklmnopqrstuvwxyz")
 	filesystemManager := domain.NewFilesystemManager("/tmp", "/tmp", "/tmp")
 
-	err := filesystemManager.CreateOutputDirectory(directoryPath)
+	err := filesystemManager.CreateDirectory(directoryPath)
 	if err != nil {
 		t.Errorf("Error creating directory")
 	}
@@ -49,34 +49,23 @@ func TestCreateOutputDirectory(t *testing.T) {
 }
 
 func TestMoveFile(t *testing.T) {
-	sourcePath := "/tmp/" + test.StringWithCharset(10, "abcdefghijklmnopqrstuvwxyz")
-	destinationPath := "/tmp/" + test.StringWithCharset(10, "abcdefghijklmnopqrstuvwxyz1234567890")
-
 	filesystemManager := domain.NewFilesystemManager("/tmp", "/tmp", "/tmp")
 	filesystemService := filesystem.NewFilesystemService(filesystemManager)
 
-	err := filesystemManager.CreateOutputDirectory(sourcePath)
-	if err != nil {
-		t.Errorf("Error creating source directory")
-	}
-	err = filesystemManager.CreateOutputDirectory(destinationPath)
-	if err != nil {
-		t.Errorf("Error creating destination directory")
-	}
 	file, _ := filesystemManager.ReadFile("../test.torrent")
 	if file == nil {
 		t.Errorf("Error reading file")
 	}
-	err = filesystemService.SaveTorrentFile(file, sourcePath+"/newtest.torrent")
+	testFilePath, err := filesystemService.SaveTorrentFile(file, "newtest.torrent")
 	if err != nil {
 		t.Errorf("Error while saving file")
 	}
 
-	err = filesystemManager.MoveFile(sourcePath+"/newtest.torrent", destinationPath+"/newtest.torrent")
+	err = filesystemManager.MoveFile(testFilePath, "/tmp"+"/newtest.torrent")
 	if err != nil {
 		t.Errorf("Error while moving file")
 	}
-	_, err = os.Stat(destinationPath + "/newtest.torrent")
+	_, err = os.Stat("/tmp" + "/newtest.torrent")
 	if os.IsNotExist(err) {
 		t.Errorf("Directory does not exist")
 	}

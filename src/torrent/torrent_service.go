@@ -1,23 +1,29 @@
 package torrent
 
-import "tm/src/torrent/dto"
+import (
+	"tm/src/torrent/domain"
+	"tm/src/torrent/dto"
+)
 
 type TorrentService struct {
+	torrentManager *domain.TorrentManager
 }
 
-func NewTorrentService() *TorrentService {
-	var newTorrentService = TorrentService{}
+func NewTorrentService(torrentManager *domain.TorrentManager) *TorrentService {
+	var newTorrentService = TorrentService{
+		torrentManager,
+	}
 	return &newTorrentService
 }
 
 func (torrentService *TorrentService) GetTorrentList(sort string, page int, pageSize int) dto.FinalTorrentsList {
-	return torrentService.GetTorrentList(sort, page, pageSize)
+	return torrentService.torrentManager.GetTorrentList(sort, page, pageSize)
 }
 
-func (torrentService *TorrentService) AddTorrent(torrentFilePath string, outputDirectory string) {
-	torrentService.AddTorrent(torrentFilePath, outputDirectory)
+func (torrentService *TorrentService) AddTorrent(file []byte) (*dto.Torrent, error) {
+	return torrentService.torrentManager.AddTorrent(file)
 }
 
 func (torrentService *TorrentService) DeleteTorrent(torrentId int) {
-	torrentService.DeleteTorrent(torrentId)
+	torrentService.torrentManager.DeleteTorrent(torrentId)
 }

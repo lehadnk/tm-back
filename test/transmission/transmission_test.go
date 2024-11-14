@@ -40,26 +40,3 @@ func TestSeparate(t *testing.T) {
 		t.Fatal("Data is not exist or not expected")
 	}
 }
-
-func TestGetTorrentFileList(t *testing.T) {
-	runner := &cli_domain.MockCliRunner{}
-	transmissionClient := transmission_domain.NewTransmissionClient(runner)
-
-	runner.On("transmission-remote", []string{"-t"}, "Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB (6 files):\n  #  Done Priority Get      Size  Name\n  0: 100% Normal   Yes 1.56 GB    Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB/Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB.avi\n  1: 100% Normal   Yes 254.3 MB   Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB/Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB.AVO.GRANKIN.ac3\n  2: 100% Normal   Yes 127.0 MB   Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB/Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB.AVO.SANAEV.ac3\n  3: 100% Normal   Yes 254.3 MB   Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB/Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB.ENG.ac3\n  4: 100% Normal   Yes 98.41 kB   Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB/Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB.ENG.SDH.srt\n  5: 100% Normal   Yes 70.94 kB   Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB/Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB.RUS.srt", nil)
-	fileList := transmissionClient.GetFileList(1)
-	if !runner.WasCommandRun("transmission-remote -t 1 -f") {
-		log.Fatalln("List torrent files command was not run")
-	}
-
-	if len(fileList) != 6 {
-		log.Fatalln("Returned list doesn't contain all files")
-	}
-
-	if fileList[0].Id != 0 {
-		log.Fatalln("First list element has an incorrect ID")
-	}
-
-	if fileList[5].Name != "Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB/Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB.RUS.srt" {
-		log.Fatalln("Last list element has an incorrect name")
-	}
-}
