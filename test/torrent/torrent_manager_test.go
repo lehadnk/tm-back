@@ -68,7 +68,7 @@ func TestAddTorrent(t *testing.T) {
 	}
 
 	commandRun := mockCliRunner.WasCommandRun("transmission-remote -a " + testTorrent.Filepath + " -w " + testTorrent.OutputDirectory)
-	if commandRun {
+	if !commandRun {
 		log.Fatalln("Command was not run")
 	}
 }
