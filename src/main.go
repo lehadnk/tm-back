@@ -1,16 +1,21 @@
-package src
+package main
 
 import (
-	"net/http"
+	"tm/src/authentication"
+	"tm/src/authentication/domain"
+	"tm/src/http"
+	"tm/src/http/communication"
+	"tm/src/user"
+	"tm/src/user/persistence"
 )
 
-func getProfile(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello World"))
-}
-
 func main() {
+	userDao := persistence.NewUserDao()
+	userService := user.NewUserService(userDao)
+	jwtManager := domain.NewJwtManager(userService)
+	authService := authentication.NewAuthService(userService, jwtManager)
 
-	http.HandleFunc("GET /my", getProfile)
-	http.HandleFunc("GET /profile", getProfile)
-	http.ListenAndServe(":8091", nil)
+	httpServer := communication.NewHttpServer(authService)
+	httpService := http.NewHttpService(httpServer)
+	httpService.Start()
 }

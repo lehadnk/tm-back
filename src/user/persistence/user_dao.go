@@ -24,7 +24,7 @@ func (dbc *UserDao) CreateUser(user *dto.User) {
 		"INSERT INTO users(name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id",
 		user.Name, user.Email, user.Password, user.Role).Scan(&userId)
 	if err != nil {
-		log.Fatalln("Could not create user: " + err.Error())
+		log.Println("Could not create user: " + err.Error())
 	}
 	user.Id = userId
 }
@@ -35,8 +35,10 @@ func (dbc *UserDao) GetUserById(userId int) *dto.User {
 		&user,
 		"SELECT * from users WHERE id = $1", userId)
 	if err != nil {
+		log.Println("Could not find user: " + err.Error())
 		return nil
 	}
+
 	return &user
 }
 
@@ -46,7 +48,7 @@ func (dbc *UserDao) GetUserByEmailAndPassword(email string, password string) *dt
 		&user,
 		"SELECT * from users WHERE email = $1 and password = $2", email, password)
 	if err != nil {
-		log.Fatalln("Could not select user: " + err.Error())
+		log.Println("Could not select user: " + err.Error())
 	}
 	return &user
 }
@@ -80,7 +82,7 @@ func (dbc *UserDao) EditUser(name string, email string, password string, role st
 			"UPDATE users SET name = $1, email = $2, password = $3, role = $4 WHERE id = $5",
 			name, email, password, role, userId)
 		if err != nil {
-			log.Fatalln("Could not update user: " + err.Error())
+			log.Println("Could not update user: " + err.Error())
 		}
 	}
 
@@ -88,13 +90,13 @@ func (dbc *UserDao) EditUser(name string, email string, password string, role st
 		"UPDATE users SET name = $1, email = $2, role = $3 WHERE id = $4",
 		name, email, role, userId)
 	if err != nil {
-		log.Fatalln("Could not update user: " + err.Error())
+		log.Println("Could not update user: " + err.Error())
 	}
 }
 
 func (dbc *UserDao) DeleteUser(userId int) {
 	_, err := dbc.Db.Exec("DELETE FROM users WHERE id = $1", userId)
 	if err != nil {
-		log.Fatalln("Could not delete user: " + err.Error())
+		log.Println("Could not delete user: " + err.Error())
 	}
 }
