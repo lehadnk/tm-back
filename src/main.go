@@ -1,6 +1,7 @@
 package main
 
 import (
+	"time"
 	"tm/src/authentication"
 	"tm/src/authentication/domain"
 	"tm/src/http"
@@ -18,4 +19,8 @@ func main() {
 	httpServer := communication.NewHttpServer(authService)
 	httpService := http.NewHttpService(httpServer)
 	httpService.Start()
+
+	for true {
+		time.Sleep(10000)
+	}
 }

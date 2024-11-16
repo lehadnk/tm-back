@@ -84,6 +84,6 @@ func (server *HttpServer) Start() {
 	http.HandleFunc("GET /user/current", server.handleCurrent)
 
 	fmt.Println("Starting http server at :8080...")
-	http.ListenAndServe(":8080", nil)
+	go http.ListenAndServe(":8080", nil)
 	fmt.Println("http server started at :8080")
 }
