@@ -11,32 +11,32 @@ type AbstractDao struct {
 }
 
 func (dbc *AbstractDao) Connect() {
-	db_name := os.Getenv("T9TP1_DB_NAME")
+	db_name := os.Getenv("TM_DB_NAME")
 	if db_name == "" {
 		db_name = "postgres"
 	}
 
-	host := os.Getenv("T9TP1_DB_HOST")
+	host := os.Getenv("TM_DB_HOST")
 	if host == "" {
 		host = "localhost"
 	}
 
-	port := os.Getenv("T9TP1_DB_PORT")
+	port := os.Getenv("TM_DB_PORT")
 	if port == "" {
 		port = "5432"
 	}
 
-	user := os.Getenv("T9TP1_DB_USER")
+	user := os.Getenv("TM_DB_USER")
 	if user == "" {
 		user = "postgres"
 	}
 
-	password := os.Getenv("T9TP1_DB_PASSWORD")
+	password := os.Getenv("TM_DB_PASSWORD")
 	if password == "" {
 		password = "postgres"
 	}
 
-	ssl := os.Getenv("T9TP1_DB_SSL")
+	ssl := os.Getenv("TM_DB_SSL")
 	if ssl == "" {
 		ssl = "disable"
 	}

@@ -67,16 +67,16 @@ func (dbc *UserDao) GetUsersList(sort string, page int, pageSize int) []dto.User
 
 func (dbc *UserDao) GetUsersCount() int {
 	var usersCount int
-	err := dbc.Db.Select(
+	err := dbc.Db.Get(
 		&usersCount,
-		"SELECT count from users")
+		"SELECT count(*) from users")
 	if err != nil {
 		log.Fatalln("Could not obtain user count: " + err.Error())
 	}
 	return usersCount
 }
 
-func (dbc *UserDao) EditUser(name string, email string, password string, role string, userId int) {
+func (dbc *UserDao) EditUser(userId int, name string, email string, password string, role string) {
 	if password != "" {
 		_, err := dbc.Db.Exec(
 			"UPDATE users SET name = $1, email = $2, password = $3, role = $4 WHERE id = $5",

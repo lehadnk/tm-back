@@ -32,11 +32,10 @@ func (userService *UserService) CreateUser(name string, email string, password s
 	}
 	userService.userDao.CreateUser(&newUser)
 	return &newUser
-
 }
 
-func (userService *UserService) UpdateUser(name string, email string, password string, role string, userId int) *dto.User {
-	userService.userDao.EditUser(name, email, password, role, userId)
+func (userService *UserService) UpdateUser(userId int, name string, email string, password string, role string) *dto.User {
+	userService.userDao.EditUser(userId, name, email, password, role)
 	return userService.userDao.GetUserById(userId)
 }
 

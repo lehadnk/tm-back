@@ -1,11 +1,11 @@
 package dto
 
 type User struct {
-	Id       int    `db:"id"`
-	Name     string `db:"name"`
-	Email    string `db:"email"`
-	Password string `db:"password"`
-	Role     string `db:"role"`
+	Id       int    `db:"id" json:"id"`
+	Name     string `db:"name" json:"name"`
+	Email    string `db:"email" json:"email"`
+	Password string `db:"password" json:"password"`
+	Role     string `db:"role" json:"role"`
 }
 
 func NewUser(name string, email string, password string, role string) *User {
@@ -18,13 +18,13 @@ func NewUser(name string, email string, password string, role string) *User {
 }
 
 type UsersList struct {
-	UsersArray []User
-	UsersCount int
+	Users []User `json:"users"`
+	Count int    `json:"count"`
 }
 
 func NewUsersList(usersArray []User, usersCount int) *UsersList {
 	return &UsersList{
-		UsersArray: usersArray,
-		UsersCount: usersCount,
+		Users: usersArray,
+		Count: usersCount,
 	}
 }

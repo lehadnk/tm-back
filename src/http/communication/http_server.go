@@ -5,18 +5,32 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/mail"
+	"strconv"
+	"strings"
 	"tm/src/authentication"
 	http_dto "tm/src/http/dto"
+	"tm/src/torrent"
+	"tm/src/user"
 	user_dto "tm/src/user/dto"
 )
 
 type HttpServer struct {
-	authService *authentication.AuthService
+	authService    *authentication.AuthService
+	userService    *user.UserService
+	torrentService *torrent.TorrentService
 }
 
-func NewHttpServer(authService *authentication.AuthService) *HttpServer {
+func NewHttpServer(
+	authService *authentication.AuthService,
+	userService *user.UserService,
+	torrentService *torrent.TorrentService,
+
+) *HttpServer {
 	return &HttpServer{
-		authService: authService,
+		authService:    authService,
+		userService:    userService,
+		torrentService: torrentService,
 	}
 }
 
@@ -26,7 +40,7 @@ func (s *HttpServer) jsonResponse(w http.ResponseWriter, data any) {
 	json.NewEncoder(w).Encode(data)
 }
 
-func (s *HttpServer) getAuthenticatedUser(w http.ResponseWriter, r *http.Request) *user_dto.User {
+func (s *HttpServer) requireAuthenticatedUser(w http.ResponseWriter, r *http.Request) *user_dto.User {
 	authHeaderValue := r.Header.Get("Authorization")
 
 	if authHeaderValue[:6] == "Bearer" {
@@ -42,13 +56,14 @@ func (s *HttpServer) getAuthenticatedUser(w http.ResponseWriter, r *http.Request
 	return user
 }
 
-func (s *HttpServer) handleCurrent(w http.ResponseWriter, r *http.Request) {
-	user := s.getAuthenticatedUser(w, r)
-	if user == nil {
-		return
+func (s *HttpServer) requireAuthenticatedAdmin(w http.ResponseWriter, r *http.Request) *user_dto.User {
+	user := s.requireAuthenticatedUser(w, r)
+	if user.Role != "admin" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return nil
 	}
 
-	s.jsonResponse(w, user)
+	return user
 }
 
 func (s *HttpServer) decodeRequestPayload(w http.ResponseWriter, r *http.Request, obj any) error {
@@ -62,6 +77,31 @@ func (s *HttpServer) decodeRequestPayload(w http.ResponseWriter, r *http.Request
 	return nil
 }
 
+func (s *HttpServer) getNumericUrlParam(w http.ResponseWriter, r *http.Request, name string) (int, error) {
+	strValue := r.URL.Query().Get(name)
+	if strValue == "" {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return 0, errors.New("Value cannot be empty")
+	}
+
+	intValue, err := strconv.Atoi(strValue)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return 0, err
+	}
+
+	return intValue, nil
+}
+
+func (s *HttpServer) handleCurrentUser(w http.ResponseWriter, r *http.Request) {
+	user := s.requireAuthenticatedUser(w, r)
+	if user == nil {
+		return
+	}
+
+	s.jsonResponse(w, user)
+}
+
 func (s *HttpServer) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var req http_dto.LoginRequest
 	err := s.decodeRequestPayload(w, r, &req)
@@ -71,7 +111,7 @@ func (s *HttpServer) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	user, token, err := s.authService.Login(req.Email, req.Password)
 	resp := http_dto.LoginResponse{
-		IsSuccess:           err != nil,
+		IsSuccess:           err == nil,
 		AuthenticationToken: token,
 		User:                user,
 	}
@@ -79,9 +119,192 @@ func (s *HttpServer) handleLogin(w http.ResponseWriter, r *http.Request) {
 	s.jsonResponse(w, resp)
 }
 
+func (s *HttpServer) handleGetUsers(w http.ResponseWriter, r *http.Request) {
+	user := s.requireAuthenticatedAdmin(w, r)
+	if user == nil {
+		return
+	}
+
+	sort := r.URL.Query().Get("sort")
+	if sort != "id" && sort != "name" {
+		http.Error(w, "Bad Request: sort should be 'id' or 'name'", http.StatusBadRequest)
+		return
+	}
+
+	limit, err := s.getNumericUrlParam(w, r, "limit")
+	if err != nil {
+		http.Error(w, "Bad Request: limit should be a numeric value", http.StatusBadRequest)
+		return
+	}
+
+	page, err := s.getNumericUrlParam(w, r, "page")
+	if err != nil {
+		http.Error(w, "Bad Request: page should be numeric value", http.StatusBadRequest)
+		return
+	}
+
+	usersList := s.userService.GetUsersList(sort, page, limit)
+
+	s.jsonResponse(w, usersList)
+}
+
+func (s *HttpServer) handleGetUser(w http.ResponseWriter, r *http.Request) {
+	admin := s.requireAuthenticatedAdmin(w, r)
+	if admin == nil {
+		return
+	}
+
+	userId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "Bad request: user id should be int value", http.StatusBadRequest)
+		return
+	}
+
+	readUser := s.userService.GetUserById(userId)
+	if readUser == nil {
+		http.Error(w, "User does not exist", http.StatusNotFound)
+		return
+	}
+
+	s.jsonResponse(w, readUser)
+}
+
+func (s *HttpServer) handleAddUser(w http.ResponseWriter, r *http.Request) {
+	user := s.requireAuthenticatedAdmin(w, r)
+	if user == nil {
+		return
+	}
+
+	var req http_dto.SaveUserRequest
+	err := s.decodeRequestPayload(w, r, &req)
+	if err != nil {
+		return
+	}
+
+	_, err = mail.ParseAddress(req.Email)
+	if err != nil {
+		http.Error(w, "Bad request: email should be a correct email", http.StatusBadRequest)
+		return
+	}
+	if len(req.Password) < 6 {
+		http.Error(w, "Bad request: password should be at least 6 characters long", http.StatusBadRequest)
+		return
+	}
+	if len(strings.TrimSpace(req.Name)) == 0 {
+		http.Error(w, "Bad request: name should not be empty", http.StatusBadRequest)
+		return
+	}
+	if req.Role != "admin" && req.Role != "user" {
+		http.Error(w, "Bad request: role should be either 'user' or 'admin'", http.StatusBadRequest)
+		return
+	}
+
+	s.userService.CreateUser(req.Name, req.Email, req.Password, req.Role)
+}
+
+func (s *HttpServer) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
+	admin := s.requireAuthenticatedAdmin(w, r)
+	if admin == nil {
+		return
+	}
+
+	var req http_dto.SaveUserRequest
+	err := s.decodeRequestPayload(w, r, &req)
+	if err != nil {
+		return
+	}
+
+	_, err = mail.ParseAddress(req.Email)
+	if err != nil {
+		http.Error(w, "Bad request: email should be a correct email", http.StatusBadRequest)
+		return
+	}
+	if len(req.Password) < 6 {
+		http.Error(w, "Bad request: password should be at least 6 characters long", http.StatusBadRequest)
+		return
+	}
+	if len(strings.TrimSpace(req.Name)) == 0 {
+		http.Error(w, "Bad request: name should not be empty", http.StatusBadRequest)
+		return
+	}
+	if req.Role != "admin" && req.Role != "user" {
+		http.Error(w, "Bad request: role should be either 'user' or 'admin'", http.StatusBadRequest)
+		return
+	}
+
+	userId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "Bad request: user id should be int value", http.StatusBadRequest)
+		return
+	}
+
+	editedUser := s.userService.GetUserById(userId)
+	if editedUser == nil {
+		http.Error(w, "User does not exist", http.StatusNotFound)
+		return
+	}
+
+	s.userService.UpdateUser(userId, req.Name, req.Email, req.Password, req.Role)
+}
+
+func (s *HttpServer) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
+	user := s.requireAuthenticatedAdmin(w, r)
+	if user == nil {
+		return
+	}
+
+	userId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "Bad request: user id should be int value", http.StatusBadRequest)
+		return
+	}
+
+	s.userService.DeleteUser(userId)
+}
+
+func (s *HttpServer) handleTorrentList(w http.ResponseWriter, r *http.Request) {
+	user := s.requireAuthenticatedUser(w, r)
+	if user == nil {
+		return
+	}
+}
+
+func (s *HttpServer) handleAddTorrent(w http.ResponseWriter, r *http.Request) {
+	user := s.requireAuthenticatedUser(w, r)
+	if user == nil {
+		return
+	}
+}
+
+func (s *HttpServer) handleDeleteTorrent(w http.ResponseWriter, r *http.Request) {
+	user := s.requireAuthenticatedUser(w, r)
+	if user == nil {
+		return
+	}
+}
+
+func (s *HttpServer) handleGetSpace(w http.ResponseWriter, r *http.Request) {
+	user := s.requireAuthenticatedUser(w, r)
+	if user == nil {
+		return
+	}
+}
+
 func (server *HttpServer) Start() {
 	http.HandleFunc("POST /login", server.handleLogin)
-	http.HandleFunc("GET /user/current", server.handleCurrent)
+
+	http.HandleFunc("GET /users/current", server.handleCurrentUser)
+	http.HandleFunc("GET /users", server.handleGetUsers)
+	http.HandleFunc("GET /users/{id}", server.handleGetUser)
+	http.HandleFunc("POST /users", server.handleAddUser)
+	http.HandleFunc("PUT /users/{id}", server.handleUpdateUser)
+	http.HandleFunc("DELETE /users/{id}", server.handleDeleteUser)
+
+	http.HandleFunc("GET /torrents", server.handleTorrentList)
+	http.HandleFunc("POST /torrents", server.handleAddTorrent)
+	http.HandleFunc("DELETE /torrents/{id}", server.handleDeleteTorrent)
+
+	http.HandleFunc("GET /space", server.handleGetSpace)
 
 	fmt.Println("Starting http server at :8080...")
 	go http.ListenAndServe(":8080", nil)
