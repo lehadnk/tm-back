@@ -219,7 +219,7 @@ func (s *HttpServer) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request: email should be a correct email", http.StatusBadRequest)
 		return
 	}
-	if len(req.Password) < 6 {
+	if len(req.Password) < 6 && req.Password != "" {
 		http.Error(w, "Bad request: password should be at least 6 characters long", http.StatusBadRequest)
 		return
 	}
