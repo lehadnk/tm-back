@@ -34,6 +34,21 @@ func NewHttpServer(
 	}
 }
 
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (s *HttpServer) jsonResponse(w http.ResponseWriter, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -43,7 +58,7 @@ func (s *HttpServer) jsonResponse(w http.ResponseWriter, data any) {
 func (s *HttpServer) requireAuthenticatedUser(w http.ResponseWriter, r *http.Request) *user_dto.User {
 	authHeaderValue := r.Header.Get("Authorization")
 
-	if authHeaderValue[:6] == "Bearer" {
+	if len(authHeaderValue) > 5 && authHeaderValue[:6] == "Bearer" {
 		authHeaderValue = authHeaderValue[7:]
 	}
 
@@ -307,6 +322,7 @@ func (server *HttpServer) Start() {
 	http.HandleFunc("GET /space", server.handleGetSpace)
 
 	fmt.Println("Starting http server at :8080...")
-	go http.ListenAndServe(":8080", nil)
+	handlerWithCors := corsMiddleware(http.DefaultServeMux)
+	go http.ListenAndServe(":8080", handlerWithCors)
 	fmt.Println("http server started at :8080")
 }
