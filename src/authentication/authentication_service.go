@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	jwtdomain "tm/src/authentication/domain"
 	"tm/src/user"
 	userdomain "tm/src/user/dto"
@@ -21,16 +22,14 @@ func NewAuthService(userService *user.UserService, jwtManager *jwtdomain.JwtMana
 }
 
 func (authService *AuthService) Login(email string, password string) (*userdomain.User, string, error) {
-	userFromDB := authService.userService.GetUserByEmailAndPassword(email, password)
+	userFromDB := authService.userService.GetUserByEmail(email)
 	if userFromDB == nil {
 		return nil, "", fmt.Errorf("user not found")
 	}
 
-	// @todo this is not working since we don't hash passwords on user creation process
-	//hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	//if userFromDB.Password != string(hashedPassword) {
-	//	return nil, "", fmt.Errorf("wrong credentials")
-	//}
+	if bcrypt.CompareHashAndPassword([]byte(userFromDB.Password), []byte(password)) != nil {
+		return nil, "", fmt.Errorf("user not found")
+	}
 
 	token, err := authService.jwtManager.GenerateToken(userFromDB)
 	if err != nil {

@@ -51,7 +51,7 @@ func (userService *UserService) GetUsersList(sort string, page int, pageSize int
 	return usersList
 }
 
-func (userService *UserService) GetUserByEmailAndPassword(email string, password string) *dto.User {
-	user := userService.userDao.GetUserByEmailAndPassword(email, password)
+func (userService *UserService) GetUserByEmail(email string) *dto.User {
+	user := userService.userDao.GetUserByEmail(email)
 	return user
 }

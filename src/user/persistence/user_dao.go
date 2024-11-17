@@ -42,11 +42,11 @@ func (dbc *UserDao) GetUserById(userId int) *dto.User {
 	return &user
 }
 
-func (dbc *UserDao) GetUserByEmailAndPassword(email string, password string) *dto.User {
+func (dbc *UserDao) GetUserByEmail(email string) *dto.User {
 	user := dto.User{}
 	err := dbc.Db.Get(
 		&user,
-		"SELECT * from users WHERE email = $1 and password = $2", email, password)
+		"SELECT * from users WHERE email = $1", email)
 	if err != nil {
 		log.Println("Could not select user: " + err.Error())
 	}
