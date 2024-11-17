@@ -84,6 +84,7 @@ func (dbc *UserDao) EditUser(userId int, name string, email string, password str
 		if err != nil {
 			log.Println("Could not update user: " + err.Error())
 		}
+		return
 	}
 
 	_, err := dbc.Db.Exec(
