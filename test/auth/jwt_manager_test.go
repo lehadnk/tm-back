@@ -17,7 +17,7 @@ func TestGenerateToken(t *testing.T) {
 
 	fake := faker.New()
 
-	testUser := userdomain.NewUser(fake.Person().Name(), fake.Internet().Email(), fake.Internet().Password(), "Admin")
+	testUser := userdomain.NewUser(fake.Person().Name(), fake.Internet().Email(), fake.Internet().Password(), "admin")
 	userDao.CreateUser(testUser)
 
 	token, err := jwtManager.GenerateToken(testUser)
