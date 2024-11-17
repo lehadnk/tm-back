@@ -73,6 +73,10 @@ func (s *HttpServer) requireAuthenticatedUser(w http.ResponseWriter, r *http.Req
 
 func (s *HttpServer) requireAuthenticatedAdmin(w http.ResponseWriter, r *http.Request) *user_dto.User {
 	user := s.requireAuthenticatedUser(w, r)
+	if user == nil {
+		return nil
+	}
+
 	if user.Role != "admin" {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return nil
