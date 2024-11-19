@@ -52,7 +52,7 @@ func (dbc *TorrentDao) GetTorrentsList(sort string, page int, pageSize int) []*d
 	var offset = (page - 1) * pageSize
 
 	err := dbc.Db.Select(
-		&torrents, "SELECT * from torrents ORDER BY $1 LIMIT $2 OFFSET $3", sort, pageSize, offset)
+		&torrents, "SELECT * from torrents ORDER BY "+sort+" LIMIT $1 OFFSET $2", pageSize, offset)
 	if err != nil {
 		log.Fatalln("Could not select torrents: " + err.Error())
 	}
