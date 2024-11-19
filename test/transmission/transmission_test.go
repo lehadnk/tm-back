@@ -40,3 +40,8 @@ func TestSeparate(t *testing.T) {
 		t.Fatal("Data is not exist or not expected")
 	}
 }
+
+func TestGetTorrentsList(t *testing.T) {
+	transmissionClient := transmission_domain.NewTransmissionClient(&cli_domain.CliRunner{})
+	transmissionClient.GetTransmissionTorrentList()
+}

@@ -286,6 +286,28 @@ func (s *HttpServer) handleTorrentList(w http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		return
 	}
+
+	sort := r.URL.Query().Get("sort")
+	if sort != "id" && sort != "name" {
+		http.Error(w, "Bad Request: sort should be 'id' or 'name'", http.StatusBadRequest)
+		return
+	}
+
+	page, err := s.getNumericUrlParam(w, r, "page")
+	if err != nil {
+		http.Error(w, "Bad Request: page should be a numeric value", http.StatusBadRequest)
+		return
+	}
+
+	pageSize, err := s.getNumericUrlParam(w, r, "pagesize")
+	if err != nil {
+		http.Error(w, "Bad Request: pagesize should be numeric value", http.StatusBadRequest)
+		return
+	}
+
+	torrentsList := s.torrentService.GetTorrentsList(sort, page, pageSize)
+	s.jsonResponse(w, torrentsList)
+
 }
 
 func (s *HttpServer) handleAddTorrent(w http.ResponseWriter, r *http.Request) {

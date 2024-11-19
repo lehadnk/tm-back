@@ -17,7 +17,9 @@ func (parser *TransmissionParser) SeparateToLines(stringToSplit string) []*dto.T
 	var lines []*dto.TransmissionTorrent
 	for i := 1; i < len(separatedResult)-1; i++ {
 		line := parseLine(separatedResult[i])
-		lines = append(lines, line)
+		if line != nil {
+			lines = append(lines, line)
+		}
 	}
 	return lines
 }
