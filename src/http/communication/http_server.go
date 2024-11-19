@@ -1,9 +1,11 @@
 package communication
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/mail"
 	"strconv"
@@ -110,6 +112,38 @@ func (s *HttpServer) getNumericUrlParam(w http.ResponseWriter, r *http.Request, 
 	}
 
 	return intValue, nil
+}
+
+func (s *HttpServer) getMultipartFormDataFile(r *http.Request, w http.ResponseWriter, field string) ([]byte, error) {
+	reader, err := r.MultipartReader()
+	if err != nil {
+		http.Error(w, "Error creating multipart reader", http.StatusInternalServerError)
+		return nil, err
+	}
+
+	var fileBytes []byte
+	for {
+		part, err := reader.NextPart()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			http.Error(w, "Error reading multipart data", http.StatusInternalServerError)
+			return nil, err
+		}
+
+		if part.FormName() == field {
+			buf := bytes.NewBuffer(nil)
+			if _, err := io.Copy(buf, part); err != nil {
+				http.Error(w, "Error reading file content", http.StatusInternalServerError)
+				return nil, err
+			}
+			fileBytes = buf.Bytes()
+		}
+		part.Close()
+	}
+
+	return fileBytes, nil
 }
 
 func (s *HttpServer) handleCurrentUser(w http.ResponseWriter, r *http.Request) {
@@ -315,6 +349,13 @@ func (s *HttpServer) handleAddTorrent(w http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		return
 	}
+
+	file, err := s.getMultipartFormDataFile(r, w, "file")
+	if err != nil {
+		return
+	}
+
+	fmt.Println(file)
 }
 
 func (s *HttpServer) handleDeleteTorrent(w http.ResponseWriter, r *http.Request) {
