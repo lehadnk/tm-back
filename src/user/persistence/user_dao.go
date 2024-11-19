@@ -58,7 +58,7 @@ func (dbc *UserDao) GetUsersList(sort string, page int, pageSize int) []dto.User
 	var offset = (page - 1) * pageSize
 
 	err := dbc.Db.Select(
-		&users, "SELECT * from users ORDER BY $1 LIMIT $2 OFFSET $3", sort, pageSize, offset)
+		&users, "SELECT * from users ORDER BY "+sort+" LIMIT $1 OFFSET $2", pageSize, offset)
 	if err != nil {
 		log.Fatalln("Could not select users: " + err.Error())
 	}
