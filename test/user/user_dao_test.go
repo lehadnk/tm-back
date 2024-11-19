@@ -4,7 +4,6 @@ import (
 	"github.com/jaswdr/faker/v2"
 	"reflect"
 	"testing"
-	"tm/src/user"
 	"tm/src/user/dto"
 	"tm/src/user/persistence"
 )
@@ -38,11 +37,4 @@ func TestSelectUserDoesNotExist(t *testing.T) {
 	if readUser != nil {
 		t.Errorf("User should be nil")
 	}
-}
-
-func TestCreateUser(t *testing.T) {
-	userDao := persistence.NewUserDao()
-	userService := user.NewUserService(userDao)
-
-	userService.CreateUser("Alexey Zauzin", "lehadnk@gmail.com", "qweqwe", "admin")
 }
