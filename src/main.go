@@ -46,10 +46,11 @@ func main() {
 	filesystemService := filesystem.NewFilesystemService(filesystemManager)
 
 	torrentDao := torrent_persistence.NewTorrentDao()
+	torrentParser := torrent_domain.NewTorrentParser()
 	cliRunner := cli_domain.CliRunner{}
 	transmissionClient := transmission_domain.NewTransmissionClient(cliRunner)
 	transmissionService := transmission.NewTransmissionService(transmissionClient)
-	torrentManager := torrent_domain.NewTorrentManager(torrentDao, transmissionService, filesystemService)
+	torrentManager := torrent_domain.NewTorrentManager(torrentDao, torrentParser, transmissionService, filesystemService)
 	torrentService := torrent.NewTorrentService(torrentManager)
 
 	httpServer := http_communication.NewHttpServer(authService, userService, torrentService)

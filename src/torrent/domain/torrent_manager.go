@@ -11,17 +11,20 @@ import (
 
 type TorrentManager struct {
 	TorrentDao          *persistence.TorrentDao
+	TorrentParser       *TorrentParser
 	TransmissionService *transmission.TransmissionService
 	Filesystemservice   *filesystem.FilesystemService
 }
 
 func NewTorrentManager(
 	torrentDao *persistence.TorrentDao,
+	torrentParser *TorrentParser,
 	transmissionService *transmission.TransmissionService,
 	filesystemservice *filesystem.FilesystemService,
 ) *TorrentManager {
 	var newTorrentManager = TorrentManager{
 		torrentDao,
+		torrentParser,
 		transmissionService,
 		filesystemservice,
 	}
@@ -44,7 +47,7 @@ func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, err
 	}
 
 	torrentManager.TransmissionService.AddTransmissionTorrentFile(torrentFilePath, outputDirectory)
-	transmissionTorrentName := filename
+	transmissionTorrentName, err := torrentManager.TorrentParser.GetTorrentNameFromBencode(torrentFilePath)
 	torrentDto := dto.NewTorrent(transmissionTorrentName, "NEW", torrentFilePath, outputDirectory)
 	torrentManager.TorrentDao.SaveTorrent(torrentDto)
 

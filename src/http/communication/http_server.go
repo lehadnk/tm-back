@@ -355,7 +355,12 @@ func (s *HttpServer) handleAddTorrent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(file)
+	newTorrent, err := s.torrentService.AddTorrent(file)
+	if err != nil {
+		http.Error(w, "Error while adding torrent: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	s.jsonResponse(w, newTorrent)
 }
 
 func (s *HttpServer) handleDeleteTorrent(w http.ResponseWriter, r *http.Request) {
