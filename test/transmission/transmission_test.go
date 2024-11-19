@@ -33,7 +33,7 @@ func TestSeparate(t *testing.T) {
 	}
 
 	if testResult[0].Id != 1 ||
-		testResult[0].Done != "100%" ||
+		testResult[0].Done != 100 ||
 		testResult[0].Down != "0.0" ||
 		testResult[0].ETA != "Done" ||
 		testResult[0].Name != "Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB" {

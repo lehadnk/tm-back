@@ -28,9 +28,46 @@ func NewTorrentManager(
 	return &newTorrentManager
 }
 
-func (torrentManager *TorrentManager) GetTorrentList(sort string, page int, pageSize int) dto.FinalTorrentsList {
+func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, error) {
+	filename := common.StringWithCharset(24, "abcdefghijklmnopqrstuvwxyz")
+
+	torrentFilePath, err := torrentManager.Filesystemservice.SaveTorrentFile(file, filename+".torrent")
+	if err != nil {
+		log.Fatalln("Error while saving file:" + err.Error())
+		return nil, err
+	}
+
+	outputDirectory, err := torrentManager.Filesystemservice.CreateTorrentOutputDirectory(filename)
+	if err != nil {
+		log.Fatalln("Error while creating output directory:" + err.Error())
+		return nil, err
+	}
+
+	torrentManager.TransmissionService.AddTransmissionTorrentFile(torrentFilePath, outputDirectory)
+	transmissionTorrentName := filename
+	torrentDto := dto.NewTorrent(transmissionTorrentName, "NEW", torrentFilePath, outputDirectory)
+	torrentManager.TorrentDao.SaveTorrent(torrentDto)
+
+	return torrentDto, err
+}
+
+func (torrentManager *TorrentManager) DeleteTorrent(torrentId int) {
+	torrentManager.TransmissionService.DeleteTransmissionTorrent(torrentId)
+	torrentManager.TorrentDao.DeleteTorrentById([]int{torrentId})
+}
+func (torrentManager *TorrentManager) GetTorrentsList(sort string, page int, pageSize int) dto.FinalTorrentsList {
 	torrentsListFromDB := torrentManager.TorrentDao.GetTorrentsList(sort, page, pageSize)
 	torrentsCount := torrentManager.TorrentDao.GetCountOfTorrents()
+	return torrentManager.buildFinalTorrentList(torrentsListFromDB, torrentsCount)
+}
+
+func (torrentManager *TorrentManager) GetActiveTorrentsList() dto.FinalTorrentsList {
+	torrentsListFromDB := torrentManager.TorrentDao.GetActiveTorrentList()
+	torrentsCount := torrentManager.TorrentDao.GetCountOfActiveTorrents()
+	return torrentManager.buildFinalTorrentList(torrentsListFromDB, torrentsCount)
+}
+
+func (torrentManager *TorrentManager) buildFinalTorrentList(torrentsListFromDB []*dto.Torrent, count int) dto.FinalTorrentsList {
 	torrentsListFromTransmission := torrentManager.TransmissionService.GetTransmissionTorrentList()
 
 	var finalTorrents []*dto.FinalTorrent
@@ -49,33 +86,7 @@ func (torrentManager *TorrentManager) GetTorrentList(sort string, page int, page
 	}
 	finalTorrentsList := dto.FinalTorrentsList{
 		FinalTorrentArray: finalTorrents,
-		FinalTorrentCount: torrentsCount,
+		FinalTorrentCount: count,
 	}
 	return finalTorrentsList
-}
-
-func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, error) {
-	filename := common.StringWithCharset(24, "abcdefghijklmnopqrstuvwxyz")
-	torrentFilePath, err := torrentManager.Filesystemservice.SaveTorrentFile(file, filename+".torrent")
-	if err != nil {
-		log.Fatalln("Error while saving file:" + err.Error())
-		return nil, err
-	}
-
-	outputDirectory, err := torrentManager.Filesystemservice.CreateTorrentOutputDirectory(filename)
-	if err != nil {
-		log.Fatalln("Error while creating output directory:" + err.Error())
-		return nil, err
-	}
-
-	torrentManager.TransmissionService.AddTransmissionTorrentFile(torrentFilePath, outputDirectory)
-	torrentDto := dto.NewTorrent("123", "NEW", torrentFilePath, outputDirectory)
-	torrentManager.TorrentDao.SaveTorrent(torrentDto)
-
-	return torrentDto, err
-}
-
-func (torrentManager *TorrentManager) DeleteTorrent(torrentId int) {
-	torrentManager.TransmissionService.DeleteTransmissionTorrent(torrentId)
-	torrentManager.TorrentDao.DeleteTorrentById([]int{torrentId})
 }

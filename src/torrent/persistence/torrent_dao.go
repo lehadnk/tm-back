@@ -38,13 +38,27 @@ func (dbc *TorrentDao) GetTorrentById(torrentId int) *dto.Torrent {
 	return &torrent
 }
 
-func (dbc *TorrentDao) GetTorrentByStatus(torrentStatus string) *dto.Torrent {
-	torrent := dto.Torrent{}
-	err := dbc.Db.Get(&torrent, "SELECT * from torrents WHERE status = $1", torrentStatus)
+func (dbc *TorrentDao) GetActiveTorrentList() []*dto.Torrent {
+	var torrents []*dto.Torrent
+	torrentStatus := "DOWNLOADING"
+
+	err := dbc.Db.Get(
+		&torrents, "SELECT * from torrents WHERE status = $1", torrentStatus)
 	if err != nil {
-		log.Fatalln("Could not select torrents: " + err.Error())
+		log.Fatalln("Could not find active torrents: " + err.Error())
 	}
-	return &torrent
+	return torrents
+}
+
+func (dbc *TorrentDao) GetCountOfActiveTorrents() int {
+	var torrentsCount int
+	torrentStatus := "DOWNLOADING"
+
+	err := dbc.Db.Get(&torrentsCount, "SELECT COUNT(*) from torrents WHERE status = $1", torrentStatus)
+	if err != nil {
+		log.Fatalln("Could not obtain active torrent count information: " + err.Error())
+	}
+	return torrentsCount
 }
 
 func (dbc *TorrentDao) GetTorrentsList(sort string, page int, pageSize int) []*dto.Torrent {

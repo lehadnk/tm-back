@@ -33,11 +33,14 @@ func parseLine(line string) *dto.TransmissionTorrent {
 	name := strings.Join(parts[8:], " ")
 
 	id, _ := strconv.Atoi(parts[0][:len(parts[0])-1])
+
+	done, _ := strconv.Atoi(parts[1][:len(parts[1])-1])
+
 	ratio, _ := strconv.Atoi(parts[6])
 
 	return &dto.TransmissionTorrent{
 		Id:     id,
-		Done:   parts[1],
+		Done:   done,
 		Have:   parts[2],
 		ETA:    parts[3],
 		Up:     parts[4],

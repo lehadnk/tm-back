@@ -16,8 +16,12 @@ func NewTorrentService(torrentManager *domain.TorrentManager) *TorrentService {
 	return &newTorrentService
 }
 
-func (torrentService *TorrentService) GetTorrentList(sort string, page int, pageSize int) dto.FinalTorrentsList {
-	return torrentService.torrentManager.GetTorrentList(sort, page, pageSize)
+func (torrentService *TorrentService) GetTorrentsList(sort string, page int, pageSize int) dto.FinalTorrentsList {
+	return torrentService.torrentManager.GetTorrentsList(sort, page, pageSize)
+}
+
+func (torrentService *TorrentService) GetActiveTorrentsList() dto.FinalTorrentsList {
+	return torrentService.torrentManager.GetActiveTorrentsList()
 }
 
 func (torrentService *TorrentService) AddTorrent(file []byte) (*dto.Torrent, error) {

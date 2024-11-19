@@ -2,7 +2,7 @@ package dto
 
 type TransmissionTorrent struct {
 	Id     int
-	Done   string
+	Done   int
 	Have   string
 	ETA    string
 	Up     string
@@ -14,7 +14,7 @@ type TransmissionTorrent struct {
 
 type TransmissionTorrentFile struct {
 	Id       int
-	Done     string
+	Done     int
 	Priority string
 	Get      string
 	Size     string

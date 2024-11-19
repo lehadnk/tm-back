@@ -33,7 +33,7 @@ func TestGetTorrentList(t *testing.T) {
 	}
 
 	mockCliRunner.On("transmission-remote", []string{"-l"}, "    ID   Done       Have  ETA           Up    Down  Ratio  Status       Name\n     1*  0%    2.20 GB  10 hrs         0.0     0.0    1.4  Stopped      Test torrent 1\n     2*  0%    2.20 GB  10 hrs         0.0     0.0    1.4  Downloading      Test torrent 2\n17     0%    3.11 MB  10 hrs       0.0   644.0   0.00  Downloading  TNG_s1", nil)
-	torrentList := torrentManager.GetTorrentList("id", 1, 2)
+	torrentList := torrentManager.GetTorrentsList("id", 1, 2)
 	if torrentList.FinalTorrentCount != 2 {
 		log.Fatalln("Expected 2 torrents, got", torrentList.FinalTorrentCount)
 	}
