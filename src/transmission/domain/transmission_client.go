@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 	"tm/src/cli/domain"
@@ -38,12 +39,28 @@ func (client *TransmissionClient) GetTransmissionTorrentList() []*dto.Transmissi
 	return parser.SeparateToLines(result)
 }
 
-func (client *TransmissionClient) DeleteTransmissionTorrent(transmissionTorrentId int) bool {
-	var args = []string{"-t", strconv.Itoa(transmissionTorrentId), "--remove-and-delete\n"}
+func (client *TransmissionClient) DeleteTransmissionTorrent(transmissionTorrentId int) error {
+	var args = []string{"-t", strconv.Itoa(transmissionTorrentId), "--remove-and-delete"}
 
-	_, stderr := client.cli.Run("transmission-remote", args)
-	if stderr != nil {
-		return false
+	response, err := client.cli.Run("transmission-remote", args)
+	if err != nil {
+		return err
 	}
-	return true
+
+	if !strings.Contains(response, "success") {
+		return errors.New("Transmission returned incorrect response to delete request: " + response)
+	}
+
+	return nil
+}
+
+func (client *TransmissionClient) GetTransmissionTorrentByName(name string) *dto.TransmissionTorrent {
+	list := client.GetTransmissionTorrentList()
+	for i := 0; i < len(list); i++ {
+		if list[i].Name == name {
+			return list[i]
+		}
+	}
+
+	return nil
 }

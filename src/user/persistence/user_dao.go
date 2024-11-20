@@ -62,6 +62,7 @@ func (dbc *UserDao) GetUsersList(sort string, page int, pageSize int) []dto.User
 	if err != nil {
 		log.Fatalln("Could not select users: " + err.Error())
 	}
+	
 	return users
 }
 

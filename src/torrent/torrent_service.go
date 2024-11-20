@@ -28,6 +28,6 @@ func (torrentService *TorrentService) AddTorrent(file []byte) (*dto.Torrent, err
 	return torrentService.torrentManager.AddTorrent(file)
 }
 
-func (torrentService *TorrentService) DeleteTorrent(torrentId int) {
-	torrentService.torrentManager.DeleteTorrent(torrentId)
+func (torrentService *TorrentService) DeleteTorrent(torrentId int) error {
+	return torrentService.torrentManager.DeleteTorrent(torrentId)
 }

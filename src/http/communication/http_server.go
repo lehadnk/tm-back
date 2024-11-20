@@ -41,9 +41,10 @@ func corsMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 
@@ -375,7 +376,10 @@ func (s *HttpServer) handleDeleteTorrent(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	s.torrentService.DeleteTorrent(torrentId)
+	err = s.torrentService.DeleteTorrent(torrentId)
+	if err != nil {
+		http.Error(w, "Error while removing torrent: "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (s *HttpServer) handleGetSpace(w http.ResponseWriter, r *http.Request) {

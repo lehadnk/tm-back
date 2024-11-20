@@ -24,6 +24,10 @@ func (transmissionService *TransmissionService) GetTransmissionTorrentList() []*
 	return transmissionService.transmissionClient.GetTransmissionTorrentList()
 }
 
-func (transmissionService *TransmissionService) DeleteTransmissionTorrent(transmissionTorrentId int) bool {
+func (transmissionService *TransmissionService) DeleteTransmissionTorrent(transmissionTorrentId int) error {
 	return transmissionService.transmissionClient.DeleteTransmissionTorrent(transmissionTorrentId)
+}
+
+func (transmissionService *TransmissionService) GetTransmissionTorrentByName(name string) *dto.TransmissionTorrent {
+	return transmissionService.transmissionClient.GetTransmissionTorrentByName(name)
 }

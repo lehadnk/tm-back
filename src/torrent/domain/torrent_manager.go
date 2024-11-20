@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"errors"
 	"log"
 	"tm/src/common"
 	"tm/src/filesystem"
@@ -54,10 +55,24 @@ func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, err
 	return torrentDto, err
 }
 
-func (torrentManager *TorrentManager) DeleteTorrent(torrentId int) {
-	torrentManager.TransmissionService.DeleteTransmissionTorrent(torrentId)
+func (torrentManager *TorrentManager) DeleteTorrent(torrentId int) error {
+	torrent := torrentManager.TorrentDao.GetTorrentById(torrentId)
+	if torrent == nil {
+		return errors.New("Torrent not found")
+	}
+
+	transmissionTorrent := torrentManager.TransmissionService.GetTransmissionTorrentByName(torrent.Name)
+	if transmissionTorrent != nil {
+		err := torrentManager.TransmissionService.DeleteTransmissionTorrent(transmissionTorrent.Id)
+		if err != nil {
+			return err
+		}
+	}
+
 	torrentManager.TorrentDao.DeleteTorrentById(torrentId)
+	return nil
 }
+
 func (torrentManager *TorrentManager) GetTorrentsList(sort string, page int, pageSize int) dto.FinalTorrentsList {
 	torrentsListFromDB := torrentManager.TorrentDao.GetTorrentsList(sort, page, pageSize)
 	torrentsCount := torrentManager.TorrentDao.GetCountOfTorrents()
@@ -73,7 +88,7 @@ func (torrentManager *TorrentManager) GetActiveTorrentsList() dto.FinalTorrentsL
 func (torrentManager *TorrentManager) buildFinalTorrentList(torrentsListFromDB []*dto.Torrent, count int) dto.FinalTorrentsList {
 	torrentsListFromTransmission := torrentManager.TransmissionService.GetTransmissionTorrentList()
 
-	var finalTorrents []*dto.FinalTorrent
+	var finalTorrents = make([]*dto.FinalTorrent, 0)
 	for i := 0; i < len(torrentsListFromDB); i++ {
 		for j := 0; j < len(torrentsListFromTransmission); j++ {
 			if torrentsListFromDB[i].Name != torrentsListFromTransmission[j].Name {

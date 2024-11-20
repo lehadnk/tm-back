@@ -33,7 +33,7 @@ func (dbc *TorrentDao) GetTorrentById(torrentId int) *dto.Torrent {
 	torrent := dto.Torrent{}
 	err := dbc.Db.Get(&torrent, "SELECT * from torrents WHERE id = $1", torrentId)
 	if err != nil {
-		log.Fatalln("Could not select torrent: " + err.Error())
+		log.Println("Could not select torrent: " + err.Error())
 	}
 	return &torrent
 }
@@ -82,10 +82,10 @@ func (dbc *TorrentDao) GetCountOfTorrents() int {
 	return torrentsCount
 }
 
-func (dbc *TorrentDao) DeleteTorrentById(ids int) {
-	err := dbc.Db.QueryRow("DELETE from torrents WHERE id = $1", ids)
+func (dbc *TorrentDao) DeleteTorrentById(id int) {
+	_, err := dbc.Db.Exec("DELETE FROM torrents WHERE id = $1", id)
 	if err != nil {
-		log.Println("Could not delete torrent: " + err.Err().Error())
+		log.Println("Could not delete torrent: " + err.Error())
 	}
 }
 
