@@ -28,7 +28,7 @@ func TestGetTorrentList(t *testing.T) {
 
 	mockCliRunner.On("transmission-remote", []string{"-a"}, "localhost:9091/transmission/rpc/ responded: success", nil)
 
-	for i := 0; i < 2; i++ {
+	for i := 1; i <= 2; i++ {
 		torrent := dto.NewTorrent("Test torrent "+strconv.Itoa(i), "NEW", "/media/torrents/"+strconv.Itoa(i)+".torrent", "/tmp")
 		torrentDao.SaveTorrent(torrent)
 	}
