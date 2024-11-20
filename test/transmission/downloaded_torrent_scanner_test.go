@@ -21,7 +21,6 @@ func TestMoveTorrentFileAfterDownload(t *testing.T) {
 	torrentDao := persistence.NewTorrentDao()
 	transmissionClient := transmission_domain.NewTransmissionClient(&mockCliRunner)
 	transmissionService := transmission.NewTransmissionService(transmissionClient)
-	//filesystemManager := filesystem_domain.NewFilesystemManager("/tmp", "/tmp", "/tmp")
 	filesystemService := filesystem.NewFilesystemService(filesystem_domain.NewFilesystemManager("/tmp", "/tmp", "/tmp"))
 	torrentManager := torrent_domain.NewTorrentManager(torrentDao, torrentParser, transmissionService, filesystemService)
 	torrentService := torrent.NewTorrentService(torrentManager)

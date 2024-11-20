@@ -42,7 +42,7 @@ func (dbc *TorrentDao) GetActiveTorrentList() []*dto.Torrent {
 	var torrents []*dto.Torrent
 	torrentStatus := "DOWNLOADING"
 
-	err := dbc.Db.Get(
+	err := dbc.Db.Select(
 		&torrents, "SELECT * from torrents WHERE status = $1", torrentStatus)
 	if err != nil {
 		log.Fatalln("Could not find active torrents: " + err.Error())
