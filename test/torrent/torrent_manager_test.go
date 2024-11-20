@@ -23,7 +23,8 @@ func TestGetTorrentList(t *testing.T) {
 	)
 	torrentDao := persistence.NewTorrentDao()
 	torrentDao.DeleteAllTorrents()
-	torrentManager := torrent_domain.NewTorrentManager(torrentDao, transmissionService, filesystemService)
+	torrentParser := torrent_domain.NewTorrentParser()
+	torrentManager := torrent_domain.NewTorrentManager(torrentDao, torrentParser, transmissionService, filesystemService)
 
 	mockCliRunner.On("transmission-remote", []string{"-a"}, "localhost:9091/transmission/rpc/ responded: success", nil)
 
@@ -46,7 +47,8 @@ func TestAddTorrent(t *testing.T) {
 	filesystemManager := filesystem_domain.NewFilesystemManager("/tmp", "/tmp", "/tmp")
 	filesystemService := filesystem.NewFilesystemService(filesystemManager)
 	torrentDao := persistence.NewTorrentDao()
-	torrentManager := torrent_domain.NewTorrentManager(torrentDao, transmissionService, filesystemService)
+	torrentParser := torrent_domain.NewTorrentParser()
+	torrentManager := torrent_domain.NewTorrentManager(torrentDao, torrentParser, transmissionService, filesystemService)
 
 	mockCliRunner.On("transmission-remote", []string{"-a"}, "localhost:9091/transmission/rpc/ responded: success", nil)
 

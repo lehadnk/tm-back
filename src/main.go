@@ -57,7 +57,7 @@ func main() {
 	httpService := http.NewHttpService(httpServer)
 	httpService.Start()
 
-	downloadedTorrentsScanner := transmission_communication.NewDownloadedTorrentsScanner(torrentService, filesystemService)
+	downloadedTorrentsScanner := transmission_communication.NewDownloadedTorrentsScanner(torrentService, filesystemService, &cliRunner)
 	downloadedTorrentsScanner.Start()
 
 	select {}
