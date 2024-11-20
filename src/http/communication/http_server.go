@@ -333,13 +333,13 @@ func (s *HttpServer) handleTorrentList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageSize, err := s.getNumericUrlParam(w, r, "pagesize")
+	limit, err := s.getNumericUrlParam(w, r, "limit")
 	if err != nil {
 		http.Error(w, "Bad Request: pagesize should be numeric value", http.StatusBadRequest)
 		return
 	}
 
-	torrentsList := s.torrentService.GetTorrentsList(sort, page, pageSize)
+	torrentsList := s.torrentService.GetTorrentsList(sort, page, limit)
 	s.jsonResponse(w, torrentsList)
 
 }

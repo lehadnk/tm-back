@@ -3,9 +3,9 @@ package dto
 import "time"
 
 type Torrent struct {
-	Id              int       `db:"id"`
-	Name            string    `db:"name"`
-	Status          string    `db:"status"`
+	Id              int       `db:"id" json:"id"`
+	Name            string    `db:"name" json:"name"`
+	Status          string    `db:"status" json:"status"`
 	Filepath        string    `db:"filepath"`
 	OutputDirectory string    `db:"output_directory"`
 	Created         time.Time `db:"created"`

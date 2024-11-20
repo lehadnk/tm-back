@@ -5,11 +5,11 @@ import (
 )
 
 type FinalTorrent struct {
-	Torrent             *Torrent                 `json:"db"`
-	TransmissionTorrent *dto.TransmissionTorrent `json:"transmission"`
+	Torrent             *Torrent                 `json:"torrent"`
+	TransmissionTorrent *dto.TransmissionTorrent `json:"transmissionTorrent"`
 }
 
 type FinalTorrentsList struct {
-	FinalTorrentArray []*FinalTorrent
-	FinalTorrentCount int
+	FinalTorrentArray []*FinalTorrent `json:"torrents"`
+	FinalTorrentCount int             `json:"count"`
 }

@@ -1,15 +1,15 @@
 package dto
 
 type TransmissionTorrent struct {
-	Id     int
-	Done   int
-	Have   string
-	ETA    string
-	Up     string
-	Down   string
-	Ratio  int
-	Status string
-	Name   string
+	Id     int    `json:"id"`
+	Done   int    `json:"done"`
+	Have   string `json:"have"`
+	ETA    string `json:"eta"`
+	Up     string `json:"up"`
+	Down   string `json:"down"`
+	Ratio  int    `json:"ration"`
+	Status string `json:"status"`
+	Name   string `json:"name"`
 }
 
 type TransmissionTorrentFile struct {
