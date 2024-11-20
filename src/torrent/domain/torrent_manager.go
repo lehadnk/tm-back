@@ -102,9 +102,10 @@ func (torrentManager *TorrentManager) buildFinalTorrentList(torrentsListFromDB [
 			finalTorrents = append(finalTorrents, &finalTorrent)
 		}
 	}
+
 	finalTorrentsList := dto.FinalTorrentsList{
 		FinalTorrentArray: finalTorrents,
-		FinalTorrentCount: count,
+		FinalTorrentCount: len(finalTorrents),
 	}
 	return finalTorrentsList
 }

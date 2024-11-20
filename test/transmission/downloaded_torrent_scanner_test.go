@@ -26,16 +26,18 @@ func TestMoveTorrentFileAfterDownload(t *testing.T) {
 	torrentManager := torrent_domain.NewTorrentManager(torrentDao, torrentParser, transmissionService, filesystemService)
 	torrentService := torrent.NewTorrentService(torrentManager)
 	downloadedTorrentsScanner := communication.NewDownloadedTorrentsScanner(torrentService, filesystemService, &mockCliRunner)
+
 	filename := common.StringWithCharset(24, "abcdefghijklmnopqrstuvwxyz")
+	torrentName := common.StringWithCharset(24, "abcdefghijklmnopqrstuvwxyz")
 
-	mockCliRunner.On("transmission-remote", []string{"-l"}, "    ID   Done       Have  ETA           Up    Down  Ratio  Status       Name\n     1   100%    2.20 GB  Done         0.0     0.0   0.00  Idle         Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB\nSum:             2.20 GB               0.0     0.0", nil)
-	mockCliRunner.On("mv", []string{"/tmp/" + filename, "/tmp/Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB"}, "", nil)
-
-	torrentTest := dto.NewTorrent("Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB", "DOWNLOADING", "/tmp/", "/tmp/"+filename)
+	torrentTest := dto.NewTorrent(torrentName, "DOWNLOADING", "/tmp/", "/tmp/"+filename)
 	torrentDao.SaveTorrent(torrentTest)
 
+	mockCliRunner.On("transmission-remote", []string{"-l"}, "    ID   Done       Have  ETA           Up    Down  Ratio  Status       Name\n     1   100%    2.20 GB  Done         0.0     0.0   0.00  Idle         "+torrentName+"\nSum:             2.20 GB               0.0     0.0", nil)
+	mockCliRunner.On("mv", []string{"/tmp/" + filename, "/tmp/" + torrentName}, "", nil)
+
 	downloadedTorrentsScanner.Scan()
-	commandRun := mockCliRunner.WasCommandRun("mv /tmp/" + filename + "/tmp/Ochen.strashnoe.kino.2000.RUS.BDRip.XviD.AC3.-HQCLUB")
+	commandRun := mockCliRunner.WasCommandRun("mv /tmp/" + filename + " /tmp/" + torrentName)
 	if !commandRun {
 		log.Fatalln("Command was not run")
 	}
