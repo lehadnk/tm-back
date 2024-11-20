@@ -368,6 +368,14 @@ func (s *HttpServer) handleDeleteTorrent(w http.ResponseWriter, r *http.Request)
 	if user == nil {
 		return
 	}
+
+	torrentId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "Bad request: user id should be int value", http.StatusBadRequest)
+		return
+	}
+
+	s.torrentService.DeleteTorrent(torrentId)
 }
 
 func (s *HttpServer) handleGetSpace(w http.ResponseWriter, r *http.Request) {

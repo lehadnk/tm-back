@@ -82,10 +82,10 @@ func (dbc *TorrentDao) GetCountOfTorrents() int {
 	return torrentsCount
 }
 
-func (dbc *TorrentDao) DeleteTorrentById(ids []int) {
-	err := dbc.Db.QueryRow("DELETE from torrents WHERE id IN($1)", ids)
+func (dbc *TorrentDao) DeleteTorrentById(ids int) {
+	err := dbc.Db.QueryRow("DELETE from torrents WHERE id = $1", ids)
 	if err != nil {
-		log.Fatalln("Could not delete torrent: " + err.Err().Error())
+		log.Println("Could not delete torrent: " + err.Err().Error())
 	}
 }
 

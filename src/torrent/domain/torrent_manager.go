@@ -56,7 +56,7 @@ func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, err
 
 func (torrentManager *TorrentManager) DeleteTorrent(torrentId int) {
 	torrentManager.TransmissionService.DeleteTransmissionTorrent(torrentId)
-	torrentManager.TorrentDao.DeleteTorrentById([]int{torrentId})
+	torrentManager.TorrentDao.DeleteTorrentById(torrentId)
 }
 func (torrentManager *TorrentManager) GetTorrentsList(sort string, page int, pageSize int) dto.FinalTorrentsList {
 	torrentsListFromDB := torrentManager.TorrentDao.GetTorrentsList(sort, page, pageSize)
