@@ -33,13 +33,6 @@ func (scanner *DownloadedTorrentsScanner) Scan() {
 			if err != nil {
 				fmt.Println("Error moving file to filesystem: ", run)
 			}
-
-			//filePath := activeTorrentsFromDB.FinalTorrentArray[i].Torrent.Filepath
-			//mediaTorrentDir := scanner.filesystemService.CreateMediaDirectory(mediaDir + "/" + activeTorrentsFromDB.FinalTorrentArray[i].Torrent.Name)
-			//err := scanner.filesystemService.MoveFile(filePath, mediaTorrentDir)
-			//if err != nil {
-			//	fmt.Println("Error moving file to filesystem: ", err)
-			//}
 		}
 	}
 	fmt.Println("Scanning downloaded torrents...")
