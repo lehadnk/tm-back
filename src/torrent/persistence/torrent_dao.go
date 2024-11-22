@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"database/sql"
 	_ "github.com/lib/pq"
 	"log"
 	"tm/src/common"
@@ -34,6 +35,18 @@ func (dbc *TorrentDao) GetTorrentById(torrentId int) *dto.Torrent {
 	err := dbc.Db.Get(&torrent, "SELECT * from torrents WHERE id = $1", torrentId)
 	if err != nil {
 		log.Println("Could not select torrent: " + err.Error())
+	}
+	return &torrent
+}
+
+func (dbc *TorrentDao) GetTorrentByName(torrentName string) *dto.Torrent {
+	var torrent dto.Torrent
+	err := dbc.Db.Get(&torrent, "SELECT * from torrents WHERE name = $1", torrentName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		log.Fatalln("Error while reading from db: " + err.Error())
 	}
 	return &torrent
 }

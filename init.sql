@@ -8,7 +8,7 @@ CREATE TABLE users (
 
 CREATE TABLE torrents (
     id bigserial primary key,
-    name varchar(255),
+    name varchar(255) unique,
     status varchar(255),
     filepath varchar(255),
     output_directory varchar(255),

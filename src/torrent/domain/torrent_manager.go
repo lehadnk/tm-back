@@ -40,6 +40,11 @@ func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, err
 		log.Fatalln("Error while saving file:" + err.Error())
 		return nil, err
 	}
+	transmissionTorrentName, err := torrentManager.TorrentParser.GetTorrentNameFromBencode(torrentFilePath)
+	torrentFromDB := torrentManager.TorrentDao.GetTorrentByName(transmissionTorrentName)
+	if torrentFromDB != nil {
+		return nil, errors.New("torrent already exists")
+	}
 
 	outputDirectory, err := torrentManager.Filesystemservice.CreateTorrentOutputDirectory(filename)
 	if err != nil {
@@ -48,8 +53,7 @@ func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, err
 	}
 
 	torrentManager.TransmissionService.AddTransmissionTorrentFile(torrentFilePath, outputDirectory)
-	transmissionTorrentName, err := torrentManager.TorrentParser.GetTorrentNameFromBencode(torrentFilePath)
-	torrentDto := dto.NewTorrent(transmissionTorrentName, "NEW", torrentFilePath, outputDirectory)
+	torrentDto := dto.NewTorrent(transmissionTorrentName, "DOWNLOADING", torrentFilePath, outputDirectory)
 	torrentManager.TorrentDao.SaveTorrent(torrentDto)
 
 	return torrentDto, err
