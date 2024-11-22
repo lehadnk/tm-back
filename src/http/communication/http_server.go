@@ -356,11 +356,16 @@ func (s *HttpServer) handleAddTorrent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newTorrent, err := s.torrentService.AddTorrent(file)
-	if err != nil {
+	newTorrent, inputError, systemError := s.torrentService.AddTorrent(file)
+	if systemError != nil {
 		http.Error(w, "Error while adding torrent: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	if inputError != nil {
+		http.Error(w, "Error while adding torrent: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	
 	s.jsonResponse(w, newTorrent)
 }
 

@@ -24,7 +24,7 @@ func (torrentService *TorrentService) GetActiveTorrentsList() dto.FinalTorrentsL
 	return torrentService.torrentManager.GetActiveTorrentsList()
 }
 
-func (torrentService *TorrentService) AddTorrent(file []byte) (*dto.Torrent, error) {
+func (torrentService *TorrentService) AddTorrent(file []byte) (*dto.Torrent, error, error) {
 	return torrentService.torrentManager.AddTorrent(file)
 }
 

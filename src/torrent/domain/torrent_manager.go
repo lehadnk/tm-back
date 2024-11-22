@@ -32,31 +32,31 @@ func NewTorrentManager(
 	return &newTorrentManager
 }
 
-func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, error) {
+func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, error, error) {
 	filename := common.StringWithCharset(24, "abcdefghijklmnopqrstuvwxyz")
 
 	torrentFilePath, err := torrentManager.Filesystemservice.SaveTorrentFile(file, filename+".torrent")
 	if err != nil {
 		log.Fatalln("Error while saving file:" + err.Error())
-		return nil, err
+		return nil, nil, err
 	}
 	transmissionTorrentName, err := torrentManager.TorrentParser.GetTorrentNameFromBencode(torrentFilePath)
 	torrentFromDB := torrentManager.TorrentDao.GetTorrentByName(transmissionTorrentName)
 	if torrentFromDB != nil {
-		return nil, errors.New("torrent already exists")
+		return nil, errors.New("Torrent already exists"), nil
 	}
 
 	outputDirectory, err := torrentManager.Filesystemservice.CreateTorrentOutputDirectory(filename)
 	if err != nil {
 		log.Fatalln("Error while creating output directory:" + err.Error())
-		return nil, err
+		return nil, nil, err
 	}
 
 	torrentManager.TransmissionService.AddTransmissionTorrentFile(torrentFilePath, outputDirectory)
 	torrentDto := dto.NewTorrent(transmissionTorrentName, "DOWNLOADING", torrentFilePath, outputDirectory)
 	torrentManager.TorrentDao.SaveTorrent(torrentDto)
 
-	return torrentDto, err
+	return torrentDto, nil, nil
 }
 
 func (torrentManager *TorrentManager) DeleteTorrent(torrentId int) error {
