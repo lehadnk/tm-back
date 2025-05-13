@@ -11,12 +11,12 @@ import (
 func TestCreateTorrentInDb(t *testing.T) {
 	torrentDao := persistence.NewTorrentDao()
 
-	torrent := dto.NewTorrent("Test torrent", "NEW", "http://test.com", "/tmp")
+	torrent := dto.NewTorrentEntity("Test torrent", "NEW", "http://test.com", "/tmp")
 	torrentDao.SaveTorrent(torrent)
 
 	readTorrent := torrentDao.GetTorrentById(torrent.Id)
 	if reflect.DeepEqual(torrent, readTorrent) {
-		t.Errorf("Torrent isn't created")
+		t.Errorf("TorrentEntity isn't created")
 	}
 }
 
@@ -25,7 +25,7 @@ func TestGetListOfTorrents(t *testing.T) {
 	torrentDao.DeleteAllTorrents()
 
 	for i := 0; i < 3; i++ {
-		torrent := dto.NewTorrent("Test torrent", "NEW", "http://test.com", "/tmp")
+		torrent := dto.NewTorrentEntity("Test torrent", "NEW", "http://test.com", "/tmp")
 		torrentDao.SaveTorrent(torrent)
 	}
 
@@ -37,6 +37,6 @@ func TestGetListOfTorrents(t *testing.T) {
 
 	torrentsListResult = torrentDao.GetTorrentsList("id", 2, 3)
 	if len(torrentsListResult) != 0 {
-		t.Errorf("Torrent should be empty")
+		t.Errorf("TorrentEntity should be empty")
 	}
 }

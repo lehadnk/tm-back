@@ -29,14 +29,14 @@ func TestGetTorrentList(t *testing.T) {
 	mockCliRunner.On("transmission-remote", []string{"-a"}, "localhost:9091/transmission/rpc/ responded: success", nil)
 
 	for i := 1; i <= 2; i++ {
-		torrent := dto.NewTorrent("Test torrent "+strconv.Itoa(i), "NEW", "/media/torrents/"+strconv.Itoa(i)+".torrent", "/tmp")
+		torrent := dto.NewTorrentEntity("Test torrent "+strconv.Itoa(i), "NEW", "/media/torrents/"+strconv.Itoa(i)+".torrent", "/tmp")
 		torrentDao.SaveTorrent(torrent)
 	}
 
 	mockCliRunner.On("transmission-remote", []string{"-l"}, "    ID   Done       Have  ETA           Up    Down  Ratio  Status       Name\n     1*  0%    2.20 GB  10 hrs         0.0     0.0    1.4  Stopped      Test torrent 1\n     2*  0%    2.20 GB  10 hrs         0.0     0.0    1.4  Downloading      Test torrent 2\n17     0%    3.11 MB  10 hrs       0.0   644.0   0.00  Downloading  TNG_s1", nil)
-	torrentList := torrentManager.GetTorrentsList("id", 1, 2)
-	if torrentList.FinalTorrentCount != 2 {
-		log.Fatalln("Expected 2 torrents, got", torrentList.FinalTorrentCount)
+	torrentList := torrentManager.GetTorrentsListFromDatabase("id", 1, 2)
+	if torrentList.Count != 2 {
+		log.Fatalln("Expected 2 torrents, got", torrentList.Count)
 	}
 }
 
@@ -57,11 +57,11 @@ func TestAddTorrent(t *testing.T) {
 		log.Fatalln("Error reading file")
 	}
 
-	testTorrent, _ := torrentManager.AddTorrent(testFile)
+	testTorrent, _, _ := torrentManager.AddTorrent(testFile)
 
 	torrentFromDB := torrentDao.GetTorrentById(testTorrent.Id)
 	if torrentFromDB == nil {
-		log.Fatalln("Torrent does not exist in database")
+		log.Fatalln("TorrentEntity does not exist in database")
 	}
 
 	torrentFromDisk, _ := filesystemManager.ReadFile(testTorrent.Filepath)

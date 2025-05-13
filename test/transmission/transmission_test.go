@@ -12,13 +12,13 @@ func TestAddTorrentFile(t *testing.T) {
 	transmissionClient := transmission_domain.NewTransmissionClient(runner)
 
 	runner.On("transmission-remote", []string{"-a"}, "localhost:9091/transmission/rpc/ responded: success", nil)
-	addTorrentResult := transmissionClient.AddTransmissionTorrentFile("/media/torrents/1.torrent", "/media/downloads/1")
+	addTorrentResult := transmissionClient.AddTorrentFileToTransmission("/media/torrents/1.torrent", "/media/downloads/1")
 	if addTorrentResult == false {
-		log.Fatalln("Torrent was not added")
+		log.Fatalln("Entity was not added")
 	}
 
 	if !runner.WasCommandRun("transmission-remote -a /media/torrents/1.torrent -w /media/downloads/1") {
-		log.Fatalln("Torrent add command was not run")
+		log.Fatalln("Entity add command was not run")
 	}
 }
 

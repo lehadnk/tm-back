@@ -2,7 +2,7 @@ package dto
 
 import "time"
 
-type Torrent struct {
+type TorrentEntity struct {
 	Id              int       `db:"id" json:"id"`
 	Name            string    `db:"name" json:"name"`
 	Status          string    `db:"status" json:"status"`
@@ -12,8 +12,8 @@ type Torrent struct {
 	Updated         time.Time `db:"updated"`
 }
 
-func NewTorrent(name string, status string, filepath string, outputdirectory string) *Torrent {
-	return &Torrent{
+func NewTorrentEntity(name string, status string, filepath string, outputdirectory string) *TorrentEntity {
+	return &TorrentEntity{
 		Name:            name,
 		Status:          status,
 		Filepath:        filepath,
@@ -21,9 +21,4 @@ func NewTorrent(name string, status string, filepath string, outputdirectory str
 		Created:         time.Now(),
 		Updated:         time.Now(),
 	}
-}
-
-type TorrentsListFromDB struct {
-	TorrentsArray []*Torrent
-	TorrentsCount int
 }

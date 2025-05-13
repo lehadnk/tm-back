@@ -32,3 +32,7 @@ func (filesystemservice *FilesystemService) CreateMediaDirectory(directoryPath s
 func (filesystemservice *FilesystemService) MoveFile(sourcePath string, destinationPath string) error {
 	return filesystemservice.filesystemManager.MoveFile(sourcePath, destinationPath)
 }
+
+func (fs *FilesystemService) GetFreeSpaceLeft() uint64 {
+	return fs.filesystemManager.GetFreeSpaceLeft()
+}

@@ -11,10 +11,10 @@ import (
 type TransmissionParser struct {
 }
 
-func (parser *TransmissionParser) SeparateToLines(stringToSplit string) []*dto.TransmissionTorrent {
+func (parser *TransmissionParser) SeparateToLines(stringToSplit string) []*dto.TransmissionTorrentData {
 	separatedResult := strings.SplitAfter(stringToSplit, "\n")
 
-	var lines []*dto.TransmissionTorrent
+	var lines []*dto.TransmissionTorrentData
 	for i := 1; i < len(separatedResult)-1; i++ {
 		line := parseLine(separatedResult[i])
 		if line != nil {
@@ -24,7 +24,7 @@ func (parser *TransmissionParser) SeparateToLines(stringToSplit string) []*dto.T
 	return lines
 }
 
-func parseLine(line string) *dto.TransmissionTorrent {
+func parseLine(line string) *dto.TransmissionTorrentData {
 	re := regexp.MustCompile(`\s{2,}`)
 	parts := re.Split(strings.TrimSpace(line), -1)
 
@@ -43,7 +43,7 @@ func parseLine(line string) *dto.TransmissionTorrent {
 
 	ratio, _ := strconv.Atoi(parts[6])
 
-	return &dto.TransmissionTorrent{
+	return &dto.TransmissionTorrentData{
 		Id:     id,
 		Done:   done,
 		Have:   parts[2],

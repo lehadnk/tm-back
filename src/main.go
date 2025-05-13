@@ -53,7 +53,7 @@ func main() {
 	torrentManager := torrent_domain.NewTorrentManager(torrentDao, torrentParser, transmissionService, filesystemService)
 	torrentService := torrent.NewTorrentService(torrentManager)
 
-	httpServer := http_communication.NewHttpServer(authService, userService, torrentService)
+	httpServer := http_communication.NewHttpServer(authService, userService, torrentService, filesystemService)
 	httpService := http.NewHttpService(httpServer)
 	httpService.Start()
 

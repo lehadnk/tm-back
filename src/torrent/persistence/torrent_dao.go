@@ -18,7 +18,7 @@ func NewTorrentDao() *TorrentDao {
 	return &newTorrentDao
 }
 
-func (dbc *TorrentDao) SaveTorrent(torrent *dto.Torrent) {
+func (dbc *TorrentDao) SaveTorrent(torrent *dto.TorrentEntity) {
 	var torrentId int
 	err := dbc.Db.QueryRow(
 		"INSERT INTO torrents(name, status, filepath, output_directory, created, updated) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
@@ -30,8 +30,8 @@ func (dbc *TorrentDao) SaveTorrent(torrent *dto.Torrent) {
 	torrent.Id = torrentId
 }
 
-func (dbc *TorrentDao) GetTorrentById(torrentId int) *dto.Torrent {
-	torrent := dto.Torrent{}
+func (dbc *TorrentDao) GetTorrentById(torrentId int) *dto.TorrentEntity {
+	torrent := dto.TorrentEntity{}
 	err := dbc.Db.Get(&torrent, "SELECT * from torrents WHERE id = $1", torrentId)
 	if err != nil {
 		log.Println("Could not select torrent: " + err.Error())
@@ -39,8 +39,8 @@ func (dbc *TorrentDao) GetTorrentById(torrentId int) *dto.Torrent {
 	return &torrent
 }
 
-func (dbc *TorrentDao) GetTorrentByName(torrentName string) *dto.Torrent {
-	var torrent dto.Torrent
+func (dbc *TorrentDao) GetTorrentByName(torrentName string) *dto.TorrentEntity {
+	var torrent dto.TorrentEntity
 	err := dbc.Db.Get(&torrent, "SELECT * from torrents WHERE name = $1", torrentName)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -51,8 +51,8 @@ func (dbc *TorrentDao) GetTorrentByName(torrentName string) *dto.Torrent {
 	return &torrent
 }
 
-func (dbc *TorrentDao) GetActiveTorrentList() []*dto.Torrent {
-	var torrents []*dto.Torrent
+func (dbc *TorrentDao) GetDownloadingTorrentList() []*dto.TorrentEntity {
+	var torrents []*dto.TorrentEntity
 	torrentStatus := "DOWNLOADING"
 
 	err := dbc.Db.Select(
@@ -74,8 +74,8 @@ func (dbc *TorrentDao) GetCountOfActiveTorrents() int {
 	return torrentsCount
 }
 
-func (dbc *TorrentDao) GetTorrentsList(sort string, page int, pageSize int) []*dto.Torrent {
-	var torrents []*dto.Torrent
+func (dbc *TorrentDao) GetTorrentsList(sort string, page int, pageSize int) []*dto.TorrentEntity {
+	var torrents []*dto.TorrentEntity
 	var offset = (page - 1) * pageSize
 
 	err := dbc.Db.Select(

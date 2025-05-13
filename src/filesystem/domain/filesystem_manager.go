@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"golang.org/x/sys/unix"
 	"io"
 	"log"
 	"os"
@@ -92,4 +93,18 @@ func (filesystemManager *FilesystemManager) CreateMediaDirectory(directoryName s
 		log.Fatalln("Error creating media directory:" + err.Error())
 	}
 	return err
+}
+
+func (filesystemManager *FilesystemManager) GetFreeSpaceLeft() uint64 {
+	var stat unix.Statfs_t
+	err := unix.Statfs(filesystemManager.torrentOutputDir, &stat)
+
+	if err != nil {
+		log.Println("Error while obtaining the free space information: " + err.Error())
+		return 0
+	}
+
+	// Free blocks * size per block = free bytes
+	freeBytes := stat.Bavail * uint64(stat.Bsize)
+	return freeBytes / 1024 / 1024 // Size in MB
 }

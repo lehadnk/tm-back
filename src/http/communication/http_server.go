@@ -8,9 +8,11 @@ import (
 	"io"
 	"net/http"
 	"net/mail"
+	"os"
 	"strconv"
 	"strings"
 	"tm/src/authentication"
+	"tm/src/filesystem"
 	http_dto "tm/src/http/dto"
 	"tm/src/torrent"
 	"tm/src/user"
@@ -18,21 +20,23 @@ import (
 )
 
 type HttpServer struct {
-	authService    *authentication.AuthService
-	userService    *user.UserService
-	torrentService *torrent.TorrentService
+	authService       *authentication.AuthService
+	userService       *user.UserService
+	torrentService    *torrent.TorrentService
+	filesystemService *filesystem.FilesystemService
 }
 
 func NewHttpServer(
 	authService *authentication.AuthService,
 	userService *user.UserService,
 	torrentService *torrent.TorrentService,
-
+	filesystemService *filesystem.FilesystemService,
 ) *HttpServer {
 	return &HttpServer{
-		authService:    authService,
-		userService:    userService,
-		torrentService: torrentService,
+		authService:       authService,
+		userService:       userService,
+		torrentService:    torrentService,
+		filesystemService: filesystemService,
 	}
 }
 
@@ -65,27 +69,27 @@ func (s *HttpServer) requireAuthenticatedUser(w http.ResponseWriter, r *http.Req
 		authHeaderValue = authHeaderValue[7:]
 	}
 
-	user, err := s.authService.GetCurrentUser(authHeaderValue)
+	authenticatedUser, err := s.authService.GetCurrentUser(authHeaderValue)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return nil
 	}
 
-	return user
+	return authenticatedUser
 }
 
 func (s *HttpServer) requireAuthenticatedAdmin(w http.ResponseWriter, r *http.Request) *user_dto.User {
-	user := s.requireAuthenticatedUser(w, r)
-	if user == nil {
+	authenticatedUser := s.requireAuthenticatedUser(w, r)
+	if authenticatedUser == nil {
 		return nil
 	}
 
-	if user.Role != "admin" {
+	if authenticatedUser.Role != "admin" {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return nil
 	}
 
-	return user
+	return authenticatedUser
 }
 
 func (s *HttpServer) decodeRequestPayload(w http.ResponseWriter, r *http.Request, obj any) error {
@@ -128,6 +132,7 @@ func (s *HttpServer) getMultipartFormDataFile(r *http.Request, w http.ResponseWr
 		if err == io.EOF {
 			break
 		}
+
 		if err != nil {
 			http.Error(w, "Error reading multipart data", http.StatusInternalServerError)
 			return nil, err
@@ -141,19 +146,23 @@ func (s *HttpServer) getMultipartFormDataFile(r *http.Request, w http.ResponseWr
 			}
 			fileBytes = buf.Bytes()
 		}
-		part.Close()
+
+		err = part.Close()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return fileBytes, nil
 }
 
 func (s *HttpServer) handleCurrentUser(w http.ResponseWriter, r *http.Request) {
-	user := s.requireAuthenticatedUser(w, r)
-	if user == nil {
+	authenticatedUser := s.requireAuthenticatedUser(w, r)
+	if authenticatedUser == nil {
 		return
 	}
 
-	s.jsonResponse(w, user)
+	s.jsonResponse(w, authenticatedUser)
 }
 
 func (s *HttpServer) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -163,19 +172,19 @@ func (s *HttpServer) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, token, err := s.authService.Login(req.Email, req.Password)
+	loggedUser, token, err := s.authService.Login(req.Email, req.Password)
 	resp := http_dto.LoginResponse{
 		IsSuccess:           err == nil,
 		AuthenticationToken: token,
-		User:                user,
+		User:                loggedUser,
 	}
 
 	s.jsonResponse(w, resp)
 }
 
 func (s *HttpServer) handleGetUsers(w http.ResponseWriter, r *http.Request) {
-	user := s.requireAuthenticatedAdmin(w, r)
-	if user == nil {
+	admin := s.requireAuthenticatedAdmin(w, r)
+	if admin == nil {
 		return
 	}
 
@@ -224,8 +233,8 @@ func (s *HttpServer) handleGetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) handleAddUser(w http.ResponseWriter, r *http.Request) {
-	user := s.requireAuthenticatedAdmin(w, r)
-	if user == nil {
+	authenticatedAdmin := s.requireAuthenticatedAdmin(w, r)
+	if authenticatedAdmin == nil {
 		return
 	}
 
@@ -302,8 +311,8 @@ func (s *HttpServer) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
-	user := s.requireAuthenticatedAdmin(w, r)
-	if user == nil {
+	authenticatedAdmin := s.requireAuthenticatedAdmin(w, r)
+	if authenticatedAdmin == nil {
 		return
 	}
 
@@ -317,8 +326,8 @@ func (s *HttpServer) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) handleTorrentList(w http.ResponseWriter, r *http.Request) {
-	user := s.requireAuthenticatedUser(w, r)
-	if user == nil {
+	authenticatedUser := s.requireAuthenticatedUser(w, r)
+	if authenticatedUser == nil {
 		return
 	}
 
@@ -346,8 +355,8 @@ func (s *HttpServer) handleTorrentList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HttpServer) handleAddTorrent(w http.ResponseWriter, r *http.Request) {
-	user := s.requireAuthenticatedUser(w, r)
-	if user == nil {
+	authenticatedUser := s.requireAuthenticatedUser(w, r)
+	if authenticatedUser == nil {
 		return
 	}
 
@@ -358,20 +367,20 @@ func (s *HttpServer) handleAddTorrent(w http.ResponseWriter, r *http.Request) {
 
 	newTorrent, inputError, systemError := s.torrentService.AddTorrent(file)
 	if systemError != nil {
-		http.Error(w, "Error while adding torrent: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error while adding torrent: "+systemError.Error(), http.StatusInternalServerError)
 		return
 	}
 	if inputError != nil {
-		http.Error(w, "Error while adding torrent: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Error while adding torrent: "+inputError.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	s.jsonResponse(w, newTorrent)
 }
 
 func (s *HttpServer) handleDeleteTorrent(w http.ResponseWriter, r *http.Request) {
-	user := s.requireAuthenticatedUser(w, r)
-	if user == nil {
+	authenticatedUser := s.requireAuthenticatedUser(w, r)
+	if authenticatedUser == nil {
 		return
 	}
 
@@ -388,10 +397,12 @@ func (s *HttpServer) handleDeleteTorrent(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *HttpServer) handleGetSpace(w http.ResponseWriter, r *http.Request) {
-	user := s.requireAuthenticatedUser(w, r)
-	if user == nil {
+	authenticatedUser := s.requireAuthenticatedUser(w, r)
+	if authenticatedUser == nil {
 		return
 	}
+
+	s.jsonResponse(w, s.filesystemService.GetFreeSpaceLeft())
 }
 
 func (server *HttpServer) Start() {
@@ -412,6 +423,12 @@ func (server *HttpServer) Start() {
 
 	fmt.Println("Starting http server at :8080...")
 	handlerWithCors := corsMiddleware(http.DefaultServeMux)
-	go http.ListenAndServe(":8080", handlerWithCors)
+	go func() {
+		err := http.ListenAndServe(":8080", handlerWithCors)
+		if err != nil {
+			fmt.Println("Unable to start the webserver at :8080")
+			os.Exit(1)
+		}
+	}()
 	fmt.Println("http server started at :8080")
 }

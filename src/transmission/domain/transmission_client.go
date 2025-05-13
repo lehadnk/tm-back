@@ -16,22 +16,22 @@ func NewTransmissionClient(cli domain.CliRunnerInterface) *TransmissionClient {
 	return &TransmissionClient{cli: cli}
 }
 
-func (client *TransmissionClient) AddTransmissionTorrentFile(torrentFilePath string, outputDirectory string) bool {
+func (client *TransmissionClient) AddTorrentFileToTransmission(torrentFilePath string, outputDirectory string) (bool, error) {
 	var args = []string{"-a", torrentFilePath, "-w", outputDirectory}
 
 	stdout, stderr := client.cli.Run("transmission-remote", args)
 	if stderr != nil {
-		return false
+		return false, stderr
 	}
 
 	if !strings.Contains(stdout, "success") {
-		return false
+		return false, errors.New("transmission-remote returned with no success response: " + stdout)
 	}
 
-	return true
+	return true, nil
 }
 
-func (client *TransmissionClient) GetTransmissionTorrentList() []*dto.TransmissionTorrent {
+func (client *TransmissionClient) GetTransmissionTorrentList() []*dto.TransmissionTorrentData {
 	var args = []string{"-l"}
 	parser := TransmissionParser{}
 
@@ -54,7 +54,7 @@ func (client *TransmissionClient) DeleteTransmissionTorrent(transmissionTorrentI
 	return nil
 }
 
-func (client *TransmissionClient) GetTransmissionTorrentByName(name string) *dto.TransmissionTorrent {
+func (client *TransmissionClient) GetTransmissionTorrentByName(name string) *dto.TransmissionTorrentData {
 	list := client.GetTransmissionTorrentList()
 	for i := 0; i < len(list); i++ {
 		if list[i].Name == name {

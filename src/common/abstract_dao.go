@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"log"
 	"os"
@@ -48,4 +49,6 @@ func (dbc *AbstractDao) Connect() {
 		log.Fatalln("Could not connect to database: " + err.Error())
 	}
 	dbc.Db = db
+
+	fmt.Println("Connected to postgres instance at " + host + ":" + port + " with db name " + db_name)
 }

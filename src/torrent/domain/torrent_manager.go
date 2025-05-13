@@ -32,7 +32,7 @@ func NewTorrentManager(
 	return &newTorrentManager
 }
 
-func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, error, error) {
+func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.TorrentEntity, error, error) {
 	filename := common.StringWithCharset(24, "abcdefghijklmnopqrstuvwxyz")
 
 	torrentFilePath, err := torrentManager.Filesystemservice.SaveTorrentFile(file, filename+".torrent")
@@ -43,7 +43,7 @@ func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, err
 	transmissionTorrentName, err := torrentManager.TorrentParser.GetTorrentNameFromBencode(torrentFilePath)
 	torrentFromDB := torrentManager.TorrentDao.GetTorrentByName(transmissionTorrentName)
 	if torrentFromDB != nil {
-		return nil, errors.New("Torrent already exists"), nil
+		return nil, errors.New("TorrentEntity already exists"), nil
 	}
 
 	outputDirectory, err := torrentManager.Filesystemservice.CreateTorrentOutputDirectory(filename)
@@ -52,8 +52,12 @@ func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, err
 		return nil, nil, err
 	}
 
-	torrentManager.TransmissionService.AddTransmissionTorrentFile(torrentFilePath, outputDirectory)
-	torrentDto := dto.NewTorrent(transmissionTorrentName, "DOWNLOADING", torrentFilePath, outputDirectory)
+	wasAddedToTransmission, err := torrentManager.TransmissionService.AddTorrentFileToTransmission(torrentFilePath, outputDirectory)
+	if !wasAddedToTransmission {
+		return nil, nil, errors.New("Torrent was not added to transmission. See application logs for error")
+	}
+
+	torrentDto := dto.NewTorrentEntity(transmissionTorrentName, "DOWNLOADING", torrentFilePath, outputDirectory)
 	torrentManager.TorrentDao.SaveTorrent(torrentDto)
 
 	return torrentDto, nil, nil
@@ -62,7 +66,7 @@ func (torrentManager *TorrentManager) AddTorrent(file []byte) (*dto.Torrent, err
 func (torrentManager *TorrentManager) DeleteTorrent(torrentId int) error {
 	torrent := torrentManager.TorrentDao.GetTorrentById(torrentId)
 	if torrent == nil {
-		return errors.New("Torrent not found")
+		return errors.New("TorrentEntity not found")
 	}
 
 	transmissionTorrent := torrentManager.TransmissionService.GetTransmissionTorrentByName(torrent.Name)
@@ -77,39 +81,37 @@ func (torrentManager *TorrentManager) DeleteTorrent(torrentId int) error {
 	return nil
 }
 
-func (torrentManager *TorrentManager) GetTorrentsList(sort string, page int, pageSize int) dto.FinalTorrentsList {
+func (torrentManager *TorrentManager) GetTorrentsListFromDatabase(sort string, page int, pageSize int) dto.AggregatedTorrentDataList {
 	torrentsListFromDB := torrentManager.TorrentDao.GetTorrentsList(sort, page, pageSize)
-	torrentsCount := torrentManager.TorrentDao.GetCountOfTorrents()
-	return torrentManager.buildFinalTorrentList(torrentsListFromDB, torrentsCount)
+	return torrentManager.hydrateTorrentListWithTransmissionData(torrentsListFromDB)
 }
 
-func (torrentManager *TorrentManager) GetActiveTorrentsList() dto.FinalTorrentsList {
-	torrentsListFromDB := torrentManager.TorrentDao.GetActiveTorrentList()
-	torrentsCount := torrentManager.TorrentDao.GetCountOfActiveTorrents()
-	return torrentManager.buildFinalTorrentList(torrentsListFromDB, torrentsCount)
+func (torrentManager *TorrentManager) GetDownloadingTorrentsList() dto.AggregatedTorrentDataList {
+	torrentsListFromDB := torrentManager.TorrentDao.GetDownloadingTorrentList()
+	return torrentManager.hydrateTorrentListWithTransmissionData(torrentsListFromDB)
 }
 
-func (torrentManager *TorrentManager) buildFinalTorrentList(torrentsListFromDB []*dto.Torrent, count int) dto.FinalTorrentsList {
+func (torrentManager *TorrentManager) hydrateTorrentListWithTransmissionData(torrentsListFromDB []*dto.TorrentEntity) dto.AggregatedTorrentDataList {
 	torrentsListFromTransmission := torrentManager.TransmissionService.GetTransmissionTorrentList()
 
-	var finalTorrents = make([]*dto.FinalTorrent, 0)
+	var aggregatedTorrentDataList = make([]*dto.AggregatedTorrentData, 0)
 	for i := 0; i < len(torrentsListFromDB); i++ {
 		for j := 0; j < len(torrentsListFromTransmission); j++ {
 			if torrentsListFromDB[i].Name != torrentsListFromTransmission[j].Name {
 				continue
 			}
 
-			finalTorrent := dto.FinalTorrent{
-				Torrent:             torrentsListFromDB[i],
-				TransmissionTorrent: torrentsListFromTransmission[j],
+			aggregatedData := dto.AggregatedTorrentData{
+				Entity:           torrentsListFromDB[i],
+				TransmissionData: torrentsListFromTransmission[j],
 			}
-			finalTorrents = append(finalTorrents, &finalTorrent)
+			aggregatedTorrentDataList = append(aggregatedTorrentDataList, &aggregatedData)
 		}
 	}
 
-	finalTorrentsList := dto.FinalTorrentsList{
-		FinalTorrentArray: finalTorrents,
-		FinalTorrentCount: len(finalTorrents),
+	finalTorrentsList := dto.AggregatedTorrentDataList{
+		Torrents: aggregatedTorrentDataList,
+		Count:    len(aggregatedTorrentDataList),
 	}
 	return finalTorrentsList
 }
